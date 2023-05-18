@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package image_processor_package is
+package image_processor_pack is
     constant G_PIXELS_NUM     integer := 64;
     constant R_B_PIXELS_NUM   integer := 32;
     constant R_B_CONV_PARAM   real    := 8.225806452;
@@ -14,7 +14,7 @@ package image_processor_package is
 end package;
 
 
-package body image_processor_package is   
+package body image_processor_pack is   
     function convert_to_eight_bit (clr_data : integer range 0 to G_PIXELS_NUM)    return std_logic_vector(7 downto 0) is
         
         variable clr_conv : std_logic_vector(7 downto 0);
