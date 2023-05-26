@@ -3,19 +3,18 @@ use ieee.std_logic_1164.all;
 entity push_button_if is
 
 generic (
-    G_RESET_ACTIVE_VALUE    : std_logic := 0,   -- Determines the RST input polarity. 
+    G_RESET_ACTIVE_VALUE    : std_logic := '0';   -- Determines the RST input polarity. 
                                                 -- 0 – the RST input is active low 
                                                 -- 1 – the RST input is active high
-    G_BUTTON_NORMAL_STATE   : std_logic := 0,   -- The state of the push button when not pressed 
-    G_PRESS_TIMOUT_VAL      : integer   := 200, -- Long press value in 10ms units 
+    G_BUTTON_NORMAL_STATE   : std_logic := '0';   -- The state of the push button when not pressed 
+    G_PRESS_TIMOUT_VAL      : integer   := 200; -- Long press value in 10ms units 
     G_TIME_BETWEEN_PULSES   : integer   := 100  -- In 10ms units
 );
-
 port ( 
     RST         : in std_logic;     -- Asynchronous reset. Active value according to G_RESET_ACTIVE_VALUE
     CLK         : in std_logic;     -- System clock 25MHz
     SW_IN       : in std_logic;     -- Push button input
-    PRESS_OUT   : out std_logic;    -- Outputs active high, 1 CLK duration 
+    PRESS_OUT   : out std_logic    -- Outputs active high, 1 CLK duration 
                                     -- pulse when the pushbutton is pressed. 
                                     -- If the button is pressed for more than 
                                     -- 2sec, this port shall output pulses each 

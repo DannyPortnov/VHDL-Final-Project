@@ -9,17 +9,17 @@ architecture behave of push_button_if_tb is    -- This is the architecture of th
 -- constants declaration    
 	constant C_PULSES               : integer := 2;
     constant C_CLK_PRD              : time := 40 ns; -- 25 MHz clock
-    constant C_RESET_ACTIVE_VALUE   : std_logic := 0,   -- Determines the RST input polarity. 
-    constant C_BUTTON_NORMAL_STATE  : std_logic := 0,   -- The state of the push button when not pressed 
-    constant C_PRESS_TIMOUT_VAL     : integer   := 200, -- Long press value in 10ms units 
-    constant C_TIME_BETWEEN_PULSES  : integer   := 100  -- In 10ms units
+    constant C_RESET_ACTIVE_VALUE   : std_logic := '0';   -- Determines the RST input polarity. 
+    constant C_BUTTON_NORMAL_STATE  : std_logic := '0';   -- The state of the push button when not pressed 
+    constant C_PRESS_TIMOUT_VAL     : integer   := 200; -- Long press value in 10ms units 
+    constant C_TIME_BETWEEN_PULSES  : integer   := 100;  -- In 10ms units
     constant C_CLK_PERIODS_IN_10MS : integer := 250000; --  10,000,000 [10ms in ns] / 40 [ns, 1 clock period] = 250,000 (amount of clock periods occuring in 10ms) 
 
     component push_button_if is                -- This is the component declaration.
     generic (
-        G_RESET_ACTIVE_VALUE    : std_logic,   -- Determines the RST input polarity. 
-        G_BUTTON_NORMAL_STATE   : std_logic,   -- The state of the push button when not pressed 
-        G_PRESS_TIMOUT_VAL      : integer, -- Long press value in 10ms units 
+        G_RESET_ACTIVE_VALUE    : std_logic;   -- Determines the RST input polarity. 
+        G_BUTTON_NORMAL_STATE   : std_logic;   -- The state of the push button when not pressed 
+        G_PRESS_TIMOUT_VAL      : integer; -- Long press value in 10ms units 
         G_TIME_BETWEEN_PULSES   : integer  -- In 10ms units
     );
 
@@ -27,14 +27,14 @@ architecture behave of push_button_if_tb is    -- This is the architecture of th
         RST         : in std_logic;     -- Asynchronous reset. Active value according to G_RESET_ACTIVE_VALUE
         CLK         : in std_logic;     -- System clock 25MHz
         SW_IN       : in std_logic;     -- Push button input
-        PRESS_OUT   : out std_logic;    
+        PRESS_OUT   : out std_logic    
     );
     end component;
 
 -- signals declaration  
     signal clk_sig      : std_logic := '0';
     signal rst_sig      : std_logic := not C_RESET_ACTIVE_VALUE;
-    signal sw_in_sig    : std_logic := G_BUTTON_NORMAL_STATE;
+    signal sw_in_sig    : std_logic := C_BUTTON_NORMAL_STATE;
     
 begin
    
