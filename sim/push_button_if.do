@@ -12,4 +12,4 @@ add wave -group push_button_test push_button_if_tb/uut/*
 config wave -signalnamewidth 1
 --restart -f
 
-run 1000ns
+run 100ms

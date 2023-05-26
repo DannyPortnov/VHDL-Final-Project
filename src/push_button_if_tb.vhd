@@ -7,13 +7,13 @@ end entity;
 architecture behave of push_button_if_tb is    -- This is the architecture of the testbench
 
 -- constants declaration    
-	constant C_PULSES               : integer := 2;
+	constant C_PULSES               : integer := 3;
     constant C_CLK_PRD              : time := 40 ns; -- 25 MHz clock
     constant C_RESET_ACTIVE_VALUE   : std_logic := '0';   -- Determines the RST input polarity. 
     constant C_BUTTON_NORMAL_STATE  : std_logic := '0';   -- The state of the push button when not pressed 
-    constant C_PRESS_TIMOUT_VAL     : integer   := 200; -- Long press value in 10ms units 
-    constant C_TIME_BETWEEN_PULSES  : integer   := 100;  -- In 10ms units
-    constant C_CLK_PERIODS_IN_10MS : integer := 250000; --  10,000,000 [10ms in ns] / 40 [ns, 1 clock period] = 250,000 (amount of clock periods occuring in 10ms) 
+    constant C_PRESS_TIMOUT_VAL     : integer   := 2; -- Long press value in 10ms units 
+    constant C_TIME_BETWEEN_PULSES  : integer   := 1;  -- In 10ms units
+    -- constant C_CLK_PERIODS_IN_10MS : integer := 250000; --  10,000,000 [10ms in ns] / 40 [ns, 1 clock period] = 250,000 (amount of clock periods occuring in 10ms) 
 
     component push_button_if is                -- This is the component declaration.
     generic (
@@ -43,7 +43,7 @@ begin
         G_RESET_ACTIVE_VALUE    => C_RESET_ACTIVE_VALUE, 
         G_BUTTON_NORMAL_STATE   => C_BUTTON_NORMAL_STATE, 
         G_PRESS_TIMOUT_VAL      => C_PRESS_TIMOUT_VAL, 
-        G_TIME_BETWEEN_PULSES   => C_PRESS_TIMOUT_VAL
+        G_TIME_BETWEEN_PULSES   => C_TIME_BETWEEN_PULSES
     )
     port map (
         RST         => rst_sig, -- The RST input of the dut instance of the pulse generator component is connected to rst_sig signal
@@ -55,7 +55,7 @@ begin
     process 
     begin
         -- Check pressing for less than C_PRESS_TIMOUT_VAL
-        wait for C_CLK_PRD/10; -- Wait for 1/10 of the clock period
+        wait for C_CLK_PRD; -- Wait for signals to stabilize
         sw_in_sig <= not sw_in_sig; -- Press the button
         wait for C_CLK_PRD; -- Wait for 1 clock period
         sw_in_sig <= not sw_in_sig; -- Stop pressing

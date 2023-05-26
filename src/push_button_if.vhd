@@ -46,13 +46,12 @@ begin
                 if timeout_counter = C_PRESS_TIMEOUT then
                     if time_between_pulses_counter = 0 then
                         press_out_reg <= '1';
-                    end if;
-                    if time_between_pulses_counter <= C_TIME_BETWEEN_PULSES then
-                        timeout_counter <= timeout_counter + 1;
-                        press_out_reg <= '0';
                     else
-                        time_between_pulses_counter <= 0;
-                        press_out_reg <= '1';
+                        press_out_reg <= '0';
+                    end if;
+                    time_between_pulses_counter <= time_between_pulses_counter + 1;
+                    if time_between_pulses_counter = C_TIME_BETWEEN_PULSES then -- If reached max value, reset counter
+                        time_between_pulses_counter <= 0; -- Value is updated AFTER the process is done, so we actually check max value - 1
                     end if;
                 else
                     if timeout_counter = 0 then -- When pressing for the first time, output a pulse immediately (1 clock cycle)
