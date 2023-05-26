@@ -28,8 +28,54 @@ package body image_processor_pack is
         end if;
         return (clr_conv);
     end convert_to_eight_bit;
+    
+    function bcd_to_7seg (BCD_IN: integer range 0 to 9) return std_logic_vector is
+    begin
+        case BCD_IN is
+            when 0 => return "1000000";
+            when 1 => return "1111001";
+            when 2 => return "0100100";
+            when 3 => return "0110000";
+            when 4 => return "0011001";
+            when 5 => return "0010010";
+            when 6 => return "0000010";
+            when 7 => return "1111000";
+            when 8 => return "0000000";
+            when others => return "0010000";
+        end case;
+    end function;
 
+    function divide(dividend: integer; divisor: integer) return integer is
+        variable quotient: integer := 0;
+        variable remainder: integer := dividend;
+    begin
+        while remainder >= divisor loop
+            remainder := remainder - divisor;
+            quotient := quotient + 1;
+        end loop;
+        return quotient;
+    end divide;
 
+    function get_nth_digit(num: integer; n: integer) return integer is
+        variable remaining_num: integer := num;
+        variable digit: integer := 0;
+        variable i: integer := 1;
+        variable pow10: integer := 1;
+    begin
+        while i < n loop
+            pow10 := pow10 * 10;
+            i := i + 1;
+        end loop;
+        while remaining_num >= pow10 loop
+            remaining_num := remaining_num - pow10;
+        end loop;
+        while remaining_num >= 10 loop
+            remaining_num := remaining_num - 10;
+            digit := digit + 1;
+        end loop;
+        return digit;
+    end get_nth_digit;
+    
 
 
 
