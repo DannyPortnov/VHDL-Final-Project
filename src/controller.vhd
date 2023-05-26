@@ -1,13 +1,14 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use WORK.image_processor_package.all;
+use WORK.image_processor_pack.all;
+
 entity controller is
 
 generic (
     G_RESET_ACTIVE_VALUE    : std_logic := '0'; -- Determines the RST input polarity. 
                                                 -- 0 – the RST input is active low 
                                                 -- 1 – the RST input is active high
-    G_VAL_1SEC              : integer := 25000000; -- In CLK units (1 [sec in ns] / 40 [ns, 1 clock period])
+    G_VAL_1SEC              : integer := 25000000 -- In CLK units (1 [sec in ns] / 40 [ns, 1 clock period])
 );
 port ( 
     RST             : in std_logic;     -- Asynchronous reset. Active value according to G_RESET_ACTIVE_VALUE
@@ -20,14 +21,14 @@ port (
     MODE            : in std_logic;     -- 0 – Manual rotation mode 
                                         -- 1 – Automatic rotation mode
     
-    ANGLE           : out integer range 0 to 3  --The angle of the displayed image
+    ANGLE           : out integer range 0 to 3;  --The angle of the displayed image
                                                 -- 0 - 0° 
                                                 -- 1 - 90° 
                                                 -- 2 - 180° 
                                                 -- 3 - 270°
-    HEX0            : out std_logic_vector(6 downto 0) -- The unity digit of the image angle
-    HEX1            : out std_logic_vector(6 downto 0) -- The tens digit of the image angle
-    HEX2            : out std_logic_vector(6 downto 0) -- The hundreds digit of the image angle
+    HEX0            : out std_logic_vector(6 downto 0); -- The unity digit of the image angle
+    HEX1            : out std_logic_vector(6 downto 0); -- The tens digit of the image angle
+    HEX2            : out std_logic_vector(6 downto 0); -- The hundreds digit of the image angle
     HEX3            : out std_logic_vector(6 downto 0) -- Should be OFF
 );
 
