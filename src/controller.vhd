@@ -53,7 +53,7 @@ begin
             HEX1 <= (others => '1');
             HEX2 <= (others => '1');
         elsif rising_edge(CLK) then
-            if MODE = '1' and VS = '1' then
+            if MODE = '1' then
                 counter <= counter + 1;
                 if counter = G_VAL_1SEC then
                     rotate_sig <= '1';
@@ -80,21 +80,23 @@ begin
                     end if;
                 end if;
                 end if;
-            HEX0 <= bcd_to_7seg(0); -- Always 0 actually
-            HEX1 <= (others => '1'); -- Turned off at first by default, then turned on in case of 90°, 180° or 270°
-            HEX2 <= (others => '1'); 
-            case angle_sig is
-                when 0 =>
-                    null;
-                when 1 =>
-                    HEX1 <= bcd_to_7seg(9);
-                when 2 =>
-                    HEX1 <= bcd_to_7seg(8);
-                    HEX2 <= bcd_to_7seg(1);
-                when others => -- 3 (270)
-                    HEX1 <= bcd_to_7seg(7);
-                    HEX2 <= bcd_to_7seg(2);
-            end case;
+            if VS = '1' then
+                HEX0 <= bcd_to_7seg(0); -- Always 0 actually
+                HEX1 <= (others => '1'); -- Turned off at first by default, then turned on in case of 90°, 180° or 270°
+                HEX2 <= (others => '1'); 
+                case angle_sig is
+                    when 0 =>
+                        null;
+                    when 1 =>
+                        HEX1 <= bcd_to_7seg(9);
+                    when 2 =>
+                        HEX1 <= bcd_to_7seg(8);
+                        HEX2 <= bcd_to_7seg(1);
+                    when others => -- 3 (270)
+                        HEX1 <= bcd_to_7seg(7);
+                        HEX2 <= bcd_to_7seg(2);
+                end case;
+            end if;
             -- if true_angle > 0 then
             --     HEX1 <= bcd_to_7seg(get_nth_digit(true_angle,2));
             -- else
