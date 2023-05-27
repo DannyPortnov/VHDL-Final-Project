@@ -117,7 +117,8 @@ begin
             -- image from the memory is displayed 
                 if IMAGE_ENA = '1' then
                     -- draw the image in the center of the screen- Apply the starting coordinates offset
-                    if ((H_CNT >= start_h) and (H_CNT <= VISIBLE_PIXELS_PER_LINE - start_h)) then
+                    if ((H_CNT >= start_h) and (H_CNT <= VISIBLE_PIXELS_PER_LINE - start_h))
+                            and ((V_CNT >= start_v) and (V_CNT <= VISIBLE_PIXELS_PER_FRAME - start_v)) then
                         -- Access the corresponding pixel from SRAM using the rotated coordinates
                         SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
                         R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0)));)
