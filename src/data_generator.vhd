@@ -61,12 +61,12 @@ begin
     begin
         --reset output
         if RST = G_RESET_ACTIVE_VALUE then    
-        rot_h_count <= 0;
-        rot_v_count <= 0;
-        start_h <= 0;
-        start_v <= 0;
-        color_counter <= 0;
-        color_index <= 0;
+            rot_h_count <= 0;
+            rot_v_count <= 0;
+            start_h <= 0;
+            start_v <= 0;
+            color_counter <= 0;
+            color_index <= 0;
         
         
         elsif rising_edge(CLK) then
@@ -81,7 +81,7 @@ begin
         -- ******************************************************************
         -- todo: need to check if we finish drawing even if the angle is
         -- changing during the drawing process:
-        
+
                 -- angle is updated only when we start creating the image
                 if H_CNT = 0 and V_CNT = 0 then
                     last_angle <= ANGLE;
