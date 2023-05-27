@@ -21,10 +21,10 @@ package body image_processor_pack is
 
     begin
         if (clr_data < R_B_PIXELS_NUM) and (clr_data >= 0) then
-            clr_conv <= std_logic_vector(to_unsigned(clr_data * integer(floor(real(255)/real(R_B_CONV_PARAM))) , clr_conv'length)); 
+            clr_conv := std_logic_vector(to_unsigned(clr_data * integer(floor(real(255)/real(R_B_CONV_PARAM))) , clr_conv'length)); 
         
         elsif (clr_data >= R_B_PIXELS_NUM) and (clr_data < G_PIXELS_NUM) then
-            clr_conv <= std_logic_vector(to_unsigned(clr_data * integer(floor(real(255)/real(G_CONV_PARAM))) , clr_conv'length)); 
+            clr_conv := std_logic_vector(to_unsigned(clr_data * integer(floor(real(255)/real(G_CONV_PARAM))) , clr_conv'length)); 
         end if;
         return (clr_conv);
     end convert_to_eight_bit;
