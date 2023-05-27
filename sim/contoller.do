@@ -13,4 +13,4 @@ add wave -group controller_test controller_tb/uut/*
 config wave -signalnamewidth 1
 --restart -f
 
-run 1000ns
+run 7000ns
