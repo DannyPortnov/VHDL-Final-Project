@@ -6,8 +6,6 @@ use WORK.image_processor_pack.all;
 entity data_generator is
     generic (
         G_RESET_ACTIVE_VALUE        : std_logic := 0;
-        C_PIXELS_PER_LINE           : integer := 800;
-        C_PIXELS_PER_FRAME          : integer := 525;
         VISIBLE_PIXELS_PER_LINE     : integer := 640;
         VISIBLE_PIXELS_PER_FRAME    : integer := 480;
         IMAGE_WIDTH                 : integer := 512;  
@@ -53,40 +51,46 @@ architecture behave of data_generator is
     signal start_h          : integer range 0 to VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH;
     signal start_v          : integer range 0 to VISIBLE_PIXELS_PER_FRAME - IMAGE_HEIGHT;
     -- Signals for color bar
-    signal color_counter   : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
-    signal color_index     : integer range 0 to 7;
+    signal color_counter    : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
+    signal color_index      : integer range 0 to 7;
+    -- Signal for saving the last angle that was recieved
+    signal last_angle       : integer range 0 to 3;
 
 begin
     process(CLK,RST)
     begin
         --reset output
         if RST = G_RESET_ACTIVE_VALUE then    
-            rot_h_count <= 0;
-            rot_v_count <= 0;
-            start_h <= 0;
-            start_v <= 0;
-            color_counter <= 0;
-            color_index <= 0;
-
-
+        rot_h_count <= 0;
+        rot_v_count <= 0;
+        start_h <= 0;
+        start_v <= 0;
+        color_counter <= 0;
+        color_index <= 0;
+        
+        
         elsif rising_edge(CLK) then
-
-        -- Check if the pixel is within the visible area
+            
+            -- Check if the pixel is within the visible area
             if (H_CNT < VISIBLE_PIXELS_PER_LINE) and (V_CNT < VISIBLE_PIXELS_PER_FRAME) then
-            -- the pixel is inside the visible area
+                -- the pixel is inside the visible area
                 DATA_DE <= '1';
-            
-            
+                
+                
+                
         -- ******************************************************************
-        -- todo: need to finish drawing even if the angle is changing
-        -- during the drawing process
+        -- todo: need to check if we finish drawing even if the angle is
+        -- changing during the drawing process:
+        
+                -- angle is updated only when we start creating the image
+                if H_CNT = 0 and V_CNT = 0 then
+                    last_angle <= ANGLE;
+                end if;
         -- ******************************************************************
-
-
 
 
             -- Determine the rotated coordinates based on the selected rotation angle
-                case ANGLE is
+                case last_angle is
                     when zero_deg =>
                         rot_h_count <= H_CNT;
                         rot_v_count <= V_CNT;
