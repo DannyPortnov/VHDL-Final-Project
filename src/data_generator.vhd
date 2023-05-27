@@ -1,13 +1,13 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use WORK.image_processor_package.all;
+use WORK.image_processor_pack.all;
 
 entity data_generator is
     generic (
         G_RESET_ACTIVE_VALUE        : std_logic := 0;
-        PIXELS_PER_LINE             : integer := 800;
-        PIXELS_PER_FRAME            : integer := 525;
+        C_PIXELS_PER_LINE           : integer := 800;
+        C_PIXELS_PER_FRAME          : integer := 525;
         VISIBLE_PIXELS_PER_LINE     : integer := 640;
         VISIBLE_PIXELS_PER_FRAME    : integer := 480;
         IMAGE_WIDTH                 : integer := 512;  
@@ -19,8 +19,8 @@ entity data_generator is
         RST            : in  std_logic;
         ANGLE          : in  integer range 0 to 3;
         IMAGE_ENA      : in  std_logic;
-        H_CNT          : in  integer range 0 to PIXELS_PER_LINE-1;
-        V_CNT          : in  integer range 0 to PIXELS_PER_FRAME-1;
+        H_CNT          : in  integer range 0 to C_PIXELS_PER_LINE-1;
+        V_CNT          : in  integer range 0 to C_PIXELS_PER_FRAME-1;
         SRAM_D         : in  std_logic_vector(15 downto 0);
         SRAM_A         : out std_logic_vector(17 downto 0);
         R_DATA         : out std_logic_vector(7 downto 0);
