@@ -9,7 +9,7 @@ architecture behave of controller_tb is    -- This is the architecture of the te
 -- constants declaration    
     constant C_CLK_PRD              : time      := 40 ns; -- 25 MHz clock
     constant C_RESET_ACTIVE_VALUE   : std_logic := '0';   -- Determines the RST input polarity. 
-    constant C_VAL_1SEC             : integer   := 5; --  amount of clock periods
+    constant C_VAL_1SEC             : integer   := 3; --  amount of clock periods
 
     component controller is
     generic (
@@ -72,64 +72,68 @@ begin
         -- Test 1:automatic mode, vs enabled, rotate CW
         mode_sig <= '1';
         vs_sig <= '1';
-        rotate_sig <= '1';
 
-        wait for 4 * C_VAL_1SEC * C_CLK_PRD; -- Test all angles
+        wait for 3 * (C_VAL_1SEC + 2) * C_CLK_PRD;-- Test all angles
+        rotate_sig <= not rotate_sig; -- Shouldn't affect rotation in automatic mode
+        wait for 2 * (C_VAL_1SEC + 2) * C_CLK_PRD;
 
         rst_sig <= not rst_sig; -- reset
-        wait for C_CLK_PRD;
+        wait for C_CLK_PRD/2;
         rst_sig <= not rst_sig;
 
         -- Test 2:automatic mode, vs enabled, rotate CCW
-        rotate_sig <= not rotate_sig;
-        wait for 4 * C_VAL_1SEC * C_CLK_PRD; -- Test all angles
+        rotation_dir_sig <= not rotation_dir_sig;
+        wait for 3 * (C_VAL_1SEC + 2) * C_CLK_PRD;-- Test all angles
+        rotate_sig <= not rotate_sig; -- Shouldn't affect rotation in automatic mode
+        wait for 2 * (C_VAL_1SEC + 2) * C_CLK_PRD;
 
         rst_sig <= not rst_sig; -- reset
-        wait for C_CLK_PRD;
+        wait for C_CLK_PRD/2;
         rst_sig <= not rst_sig;
 
-        -- Test 3:manual mode, vs enabled, rotate CW
+        -- Test 3:manual mode, rotate CW
         mode_sig <= not mode_sig;
-        rotate_sig <= not rotate_sig;
-        wait for 4 * C_VAL_1SEC * C_CLK_PRD; -- Test all angles
+        rotate_sig <= '1';
+        wait for 3 * C_CLK_PRD;-- Test all angles
+        vs_sig <= not vs_sig; -- Shouldn't affect rotation in manual mode
+        wait for 3 * C_CLK_PRD;
 
         rst_sig <= not rst_sig; -- reset
-        wait for C_CLK_PRD;
+        wait for C_CLK_PRD/2;
         rst_sig <= not rst_sig;
 
-        -- Test 4:manual mode, vs enabled, rotate CCW
-        rotate_sig <= not rotate_sig;
-        wait for 4 * C_VAL_1SEC * C_CLK_PRD; -- Test all angles
+        -- Test 4:manual mode, rotate CCW
+        rotation_dir_sig <= not rotation_dir_sig;
+        wait for 6 * C_CLK_PRD;-- Test all angles
 
         rst_sig <= not rst_sig; -- reset
-        wait for C_CLK_PRD;
+        wait for C_CLK_PRD/2;
         rst_sig <= not rst_sig;
 
-        -- Test 5:automatic mode, vs disabled, rotate both ways
+        -- Test 5:automatic mode, vs disabled midway
         mode_sig <= not mode_sig;
+
+        wait for 2 * C_VAL_1SEC * C_CLK_PRD; 
         vs_sig <= not vs_sig;
-        rotate_sig <= not rotate_sig;
-
-        wait for 2 * C_VAL_1SEC * C_CLK_PRD; -- Test all angles
-        rotate_sig <= not rotate_sig;
-        wait for 2 * C_VAL_1SEC * C_CLK_PRD;
+        wait for 3 * C_VAL_1SEC * C_CLK_PRD; -- See that angle stops changing after disabling vs
 
         rst_sig <= not rst_sig; -- reset
-        wait for C_CLK_PRD;
+        wait for C_CLK_PRD/2;
         rst_sig <= not rst_sig;
 
         -- Test 6:manual mode, rotate both ways
         mode_sig <= not mode_sig;
         
-        wait for 2 * C_VAL_1SEC * C_CLK_PRD; -- Test all angles
-        rotate_sig <= not rotate_sig;
-        wait for 2 * C_VAL_1SEC * C_CLK_PRD;
-
+        wait for 4 * C_CLK_PRD; -- Test all angles
+        rotation_dir_sig <= not rotation_dir_sig;
+        wait for 3  * C_CLK_PRD;
 
         --assert angle_sig = 1 report "Test failed: expected angle_sig = 1 but got " & integer'image(angle_sig) severity error;
 
         wait;
     end process;
+    
+
     
     clk_sig <= not clk_sig after C_CLK_PRD / 2;     -- clk_sig toggles every C_CLK_PRD/2 ns
 
