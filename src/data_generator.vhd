@@ -113,20 +113,23 @@ begin
                 start_h <= to_integer(unsigned(VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH) shr 1);
                 start_v <= to_integer(unsigned(VISIBLE_PIXELS_PER_FRAME - IMAGE_HEIGHT) shr 1);
 
-            -- Apply the starting coordinates offset
-                rot_h_count <= rot_h_count + start_h;
-                rot_v_count <= rot_v_count + start_v;
-
-
+            
             -- image from the memory is displayed 
                 if IMAGE_ENA = '1' then
-                    -- Access the corresponding pixel from SRAM using the rotated coordinates
-                    SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
-                    R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0)));)
-                    G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5)));)
-                    B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11)));)
-                
-                
+                    -- draw the image in the center of the screen- Apply the starting coordinates offset
+                    if ((H_CNT >= start_h) and (H_CNT <= VISIBLE_PIXELS_PER_LINE - start_h)) then
+                        -- Access the corresponding pixel from SRAM using the rotated coordinates
+                        SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
+                        R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0)));)
+                        G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5)));)
+                        B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11)));)
+                    
+                    -- draw a black pixel if we exceed the image coordinates
+                    else
+                        R_DATA <= (others => '0');
+                        G_DATA <= (others => '0');
+                        B_DATA <= (others => '0');
+                    end if;
 
 
             -- color bar is displayed
