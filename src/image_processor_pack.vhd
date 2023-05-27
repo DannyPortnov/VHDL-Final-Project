@@ -65,13 +65,13 @@ package body image_processor_pack is
         return quotient;
     end divide;
 
-    function get_nth_digit(num: integer; n: integer) return integer is
-        variable remaining_num: integer := num;
-        variable digit: integer := 0;
-        variable i: integer := 1;
-        variable pow10: integer := 1;
+    function get_nth_digit(num: integer; n: integer) return integer is 
+        variable remaining_num  : integer := num;
+        variable digit          : integer := 0;
+        variable i              : integer := 1;
+        variable pow10          : integer := 1;
     begin
-        while i < n loop
+        while i <= n loop
             pow10 := pow10 * 10;
             i := i + 1;
         end loop;
@@ -82,6 +82,9 @@ package body image_processor_pack is
             remaining_num := remaining_num - 10;
             digit := digit + 1;
         end loop;
+        if (digit > 9) then
+            digit := get_nth_digit(digit, 2);
+        end if;
         return digit;
     end get_nth_digit;
     
