@@ -41,8 +41,28 @@ architecture behave of controller is
     signal counter : integer := 0;
     signal rotate_sig : std_logic := '0';
     constant BASE_ANGLE : integer := 90;
-    --signal true_angle : integer  range 0 to 270 := 0;
+    signal unity_bcd_out : std_logic_vector(6 downto 0);
+    signal tens_bcd_of_90_out : std_logic_vector(6 downto 0);
+    signal tens_bcd_of_180_out : std_logic_vector(6 downto 0);
+    signal tens_bcd_of_270_out : std_logic_vector(6 downto 0);
+    signal hundreds_bcd_of_270_out : std_logic_vector(6 downto 0);
+    signal hundreds_bcd_of_180_out : std_logic_vector(6 downto 0);
+
+    component bcd_to_7seg is
+        port (
+            BCD_IN : in   integer range 0 to 9;
+            D_OUT  : out  std_logic_vector(6 downto 0)
+        );
+        end component;
 begin
+
+    unity_bcd: bcd_to_7seg port map(BCD_IN => 0,D_OUT => unity_bcd_out); 
+    tens_bcd_of_90: bcd_to_7seg port map(BCD_IN => 9,D_OUT => tens_bcd_of_90_out); 
+    tens_bcd_of_180: bcd_to_7seg port map(BCD_IN => 8,D_OUT => tens_bcd_of_180_out); 
+    tens_bcd_of_270: bcd_to_7seg port map(BCD_IN => 7,D_OUT => tens_bcd_of_270_out);
+    hundreds_bcd_of_270: bcd_to_7seg port map(BCD_IN => 2,D_OUT => hundreds_bcd_of_270_out); 
+    hundreds_bcd_of_180: bcd_to_7seg port map(BCD_IN => 1,D_OUT => hundreds_bcd_of_180_out);
+
     process(RST, CLK)
     begin
         if RST = G_RESET_ACTIVE_VALUE then
@@ -81,32 +101,22 @@ begin
                 end if;
                 end if;
             if VS = '1' then
-                HEX0 <= bcd_to_7seg(0); -- Always 0 actually
+                HEX0 <= unity_bcd_out; -- Always 0 actually
                 HEX1 <= (others => '1'); -- Turned off at first by default, then turned on in case of 90°, 180° or 270°
                 HEX2 <= (others => '1'); 
                 case angle_sig is
                     when 0 =>
                         null;
                     when 1 =>
-                        HEX1 <= bcd_to_7seg(9);
+                        HEX1 <= tens_bcd_of_90_out;
                     when 2 =>
-                        HEX1 <= bcd_to_7seg(8);
-                        HEX2 <= bcd_to_7seg(1);
+                        HEX1 <= hundreds_bcd_of_180_out;
+                        HEX2 <= tens_bcd_of_180_out;
                     when others => -- 3 (270)
-                        HEX1 <= bcd_to_7seg(7);
-                        HEX2 <= bcd_to_7seg(2);
+                        HEX1 <= tens_bcd_of_270_out;
+                        HEX2 <= hundreds_bcd_of_270_out;
                 end case;
             end if;
-            -- if true_angle > 0 then
-            --     HEX1 <= bcd_to_7seg(get_nth_digit(true_angle,2));
-            -- else
-            --     HEX1 <= (others => '1');
-            -- end if;
-            -- if true_angle > BASE_ANGLE then
-            --     HEX2 <= bcd_to_7seg(get_nth_digit(true_angle,3));
-            -- else
-            --     HEX2 <= (others => '1');
-            -- end if;
         end if;
     end process;
 
