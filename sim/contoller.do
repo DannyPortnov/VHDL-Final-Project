@@ -4,6 +4,7 @@ if {[file exists sim/work]} {
 }
 vlib work
 vcom ../src/image_processor_pack.vhd 
+vcom ../src/bcd_to_7seg.vhd 
 vcom ../src/controller.vhd 
 vcom ../src/controller_tb.vhd 
 
