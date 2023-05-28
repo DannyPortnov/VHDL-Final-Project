@@ -4,6 +4,9 @@ use ieee.numeric_std.all;
 use ieee.math_real.all;
 
 package image_processor_pack is
+    constant C_PIXELS_PER_LINE		: integer := 800;
+	constant C_PIXELS_PER_FRAME		: integer := 525;
+
     constant G_PIXELS_NUM   : integer := 64;
     constant R_B_PIXELS_NUM :  integer := 32;
     constant R_B_CONV_PARAM :  real    := 8.225806452;

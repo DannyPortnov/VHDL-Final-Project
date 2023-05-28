@@ -1,13 +1,11 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use WORK.image_processor_package.all;
+use WORK.image_processor_pack.all;
 
 entity data_generator is
     generic (
         G_RESET_ACTIVE_VALUE        : std_logic := 0;
-        PIXELS_PER_LINE             : integer := 800;
-        PIXELS_PER_FRAME            : integer := 525;
         VISIBLE_PIXELS_PER_LINE     : integer := 640;
         VISIBLE_PIXELS_PER_FRAME    : integer := 480;
         IMAGE_WIDTH                 : integer := 512;  
@@ -19,8 +17,8 @@ entity data_generator is
         RST            : in  std_logic;
         ANGLE          : in  integer range 0 to 3;
         IMAGE_ENA      : in  std_logic;
-        H_CNT          : in  integer range 0 to PIXELS_PER_LINE-1;
-        V_CNT          : in  integer range 0 to PIXELS_PER_FRAME-1;
+        H_CNT          : in  integer range 0 to C_PIXELS_PER_LINE-1;
+        V_CNT          : in  integer range 0 to C_PIXELS_PER_FRAME-1;
         SRAM_D         : in  std_logic_vector(15 downto 0);
         SRAM_A         : out std_logic_vector(17 downto 0);
         R_DATA         : out std_logic_vector(7 downto 0);
@@ -53,8 +51,10 @@ architecture behave of data_generator is
     signal start_h          : integer range 0 to VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH;
     signal start_v          : integer range 0 to VISIBLE_PIXELS_PER_FRAME - IMAGE_HEIGHT;
     -- Signals for color bar
-    signal color_counter   : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
-    signal color_index     : integer range 0 to 7;
+    signal color_counter    : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
+    signal color_index      : integer range 0 to 7;
+    -- Signal for saving the last angle that was recieved
+    signal last_angle       : integer range 0 to 3;
 
 begin
     process(CLK,RST)
@@ -67,26 +67,30 @@ begin
             start_v <= 0;
             color_counter <= 0;
             color_index <= 0;
-
-
+        
+        
         elsif rising_edge(CLK) then
-
-        -- Check if the pixel is within the visible area
+            
+            -- Check if the pixel is within the visible area
             if (H_CNT < VISIBLE_PIXELS_PER_LINE) and (V_CNT < VISIBLE_PIXELS_PER_FRAME) then
-            -- the pixel is inside the visible area
+                -- the pixel is inside the visible area
                 DATA_DE <= '1';
-            
-            
+                
+                
+                
         -- ******************************************************************
-        -- todo: need to finish drawing even if the angle is changing
-        -- during the drawing process
+        -- todo: need to check if we finish drawing even if the angle is
+        -- changing during the drawing process:
+
+                -- angle is updated only when we start creating the image
+                if H_CNT = 0 and V_CNT = 0 then
+                    last_angle <= ANGLE;
+                end if;
         -- ******************************************************************
-
-
 
 
             -- Determine the rotated coordinates based on the selected rotation angle
-                case ANGLE is
+                case last_angle is
                     when zero_deg =>
                         rot_h_count <= H_CNT;
                         rot_v_count <= V_CNT;
@@ -109,20 +113,24 @@ begin
                 start_h <= to_integer(unsigned(VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH) shr 1);
                 start_v <= to_integer(unsigned(VISIBLE_PIXELS_PER_FRAME - IMAGE_HEIGHT) shr 1);
 
-            -- Apply the starting coordinates offset
-                rot_h_count <= rot_h_count + start_h;
-                rot_v_count <= rot_v_count + start_v;
-
-
+            
             -- image from the memory is displayed 
                 if IMAGE_ENA = '1' then
-                    -- Access the corresponding pixel from SRAM using the rotated coordinates
-                    SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
-                    R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0)));)
-                    G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5)));)
-                    B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11)));)
-                
-                
+                    -- draw the image in the center of the screen- Apply the starting coordinates offset
+                    if ((H_CNT >= start_h) and (H_CNT <= VISIBLE_PIXELS_PER_LINE - start_h))
+                            and ((V_CNT >= start_v) and (V_CNT <= VISIBLE_PIXELS_PER_FRAME - start_v)) then
+                        -- Access the corresponding pixel from SRAM using the rotated coordinates
+                        SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
+                        R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0)));)
+                        G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5)));)
+                        B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11)));)
+                    
+                    -- draw a black pixel if we exceed the image coordinates
+                    else
+                        R_DATA <= (others => '0');
+                        G_DATA <= (others => '0');
+                        B_DATA <= (others => '0');
+                    end if;
 
 
             -- color bar is displayed
