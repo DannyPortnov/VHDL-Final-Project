@@ -5,3 +5,5 @@ par/*
 !par/*.qsf
 !par/*.sdc
 !par/*.qws
+mem.bin
+bin32/
