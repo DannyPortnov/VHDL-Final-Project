@@ -69,10 +69,14 @@ architecture behave of timing_generator is
             end if; 
 
         -- horizontal sync for 640 pixels
-            if (h_cnt_sig >= (H_visible + H_FP - 1) and h_cnt_sig < (C_PIXELS_PER_LINE - H_BP - 1)) then
+            if ((h_cnt_sig - HS_pulse - H_BP) >= (H_visible + H_FP - 1) or h_cnt_sig < (HS_pulse - 1)) then
                 H_SYNC <= '0';
-            elsif (h_cnt_sig < (H_visible + H_FP - 1) or h_cnt_sig >= (C_PIXELS_PER_LINE - H_BP - 1)) then
+            elsif ((h_cnt_sig - HS_pulse - H_BP) < (H_visible + H_FP - 1) and h_cnt_sig >= (HS_pulse - 1)) then
                 H_SYNC <= '1';
+            -- if (h_cnt_sig = (C_PIXELS_PER_LINE - 1) or h_cnt_sig < (HS_pulse - 1)) then
+            --     H_SYNC <= '0';
+            -- else
+            --     H_SYNC <= '1';
             -- elsif (h_cnt_sig = C_PIXELS_PER_LINE - 1) then
             --     H_SYNC <= '1';                
             end if;

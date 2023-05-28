@@ -121,9 +121,13 @@ begin
                             and ((V_CNT >= start_v) and (V_CNT <= VISIBLE_PIXELS_PER_FRAME - start_v)) then
                         -- Access the corresponding pixel from SRAM using the rotated coordinates
                         SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
-                        R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0)));)
-                        G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5)));)
-                        B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11)));)
+                        R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0))), 5);
+                        G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5))), 6);
+                        B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11))), 5);
+                        -- SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
+                        -- R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0))), SRAM_D(4 downto 0)'length);
+                        -- G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5))), SRAM_D(10 downto 5)'length);
+                        -- B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11))), SRAM_D(15 downto 11)'length);
                     
                     -- draw a black pixel if we exceed the image coordinates
                     else

@@ -6,15 +6,17 @@ use ieee.math_real.all;
 package image_processor_pack is
     constant C_PIXELS_PER_LINE		: integer := 800;
 	constant C_PIXELS_PER_FRAME		: integer := 525;
-
-    constant G_PIXELS_NUM   : integer := 64;
-    constant R_B_PIXELS_NUM :  integer := 32;
+    constant MAX_BITS       :  integer := 255
+    constant G_PIXELS_NUM   :  integer := 64;
+    constant G_BITS_NUM :  integer := 6;
     constant R_B_CONV_PARAM :  real    := 8.225806452;
     constant G_CONV_PARAM   :  real    := 4.047619048;
     -- function that converts color from L<=8 bit to 8 bit representation
     -- To Niv: the type of a function’s arguments and return value
     -- must be specified using a type mark (std_logic_vector), not a subtype indication (std_logic_vector(7 downto 0)). 
-    function convert_to_eight_bit (clr_data : integer range 0 to G_PIXELS_NUM) return std_logic_vector;
+    function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM;
+                                   bits_num   : integer range 0 to G_BITS_NUM) return std_logic_vector;
+                                   
     -- function that converts BCD to 7 segment representation
     function bcd_to_7seg (BCD_IN: integer range 0 to 9) return std_logic_vector;
     -- function that divides two integers
@@ -26,21 +28,28 @@ end package;
 
 package body image_processor_pack is   
     
-    function convert_to_eight_bit (clr_data : integer range 0 to G_PIXELS_NUM)    return std_logic_vector is
-        
-        variable clr_conv : std_logic_vector(7 downto 0);
+    -- function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM)    return std_logic_vector is
+    function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM;
+                                   bits_num   : integer range 0 to G_BITS_NUM) return std_logic_vector is    
+        variable color_conv : std_logic_vector(7 downto 0);
 
     begin
         -- To Niv: variables are assigned values using the variable assignment operator :=, not the signal assignment operator <=.
-        if (clr_data < R_B_PIXELS_NUM) and (clr_data >= 0) then
-            clr_conv := std_logic_vector(to_unsigned(clr_data * integer(floor(real(255)/real(R_B_CONV_PARAM))) , clr_conv'length)); 
+        color_conv := std_logic_vector(to_unsigned(integer(floor(real(color_data)*(real(MAX_BITS)/real((2**bits_num - 1))))) , color_conv'length)); 
+        -- if (color_data < R_B_PIXELS_NUM) and (color_data >= 0) then
+        --     color_conv := std_logic_vector(to_unsigned(integer(floor(real(color_data)*(real(255)/real(R_B_CONV_PARAM)))) , color_conv'length)); 
         
-        elsif (clr_data >= R_B_PIXELS_NUM) and (clr_data < G_PIXELS_NUM) then
-            clr_conv := std_logic_vector(to_unsigned(clr_data * integer(floor(real(255)/real(G_CONV_PARAM))) , clr_conv'length)); 
-        end if;
-        return (clr_conv);
+        -- elsif (color_data >= R_B_PIXELS_NUM) and (color_data < G_PIXELS_NUM) then
+        --     color_conv := std_logic_vector(to_unsigned(color_data * integer(floor(real(255)/real(G_CONV_PARAM))) , color_conv'length)); 
+        -- end if;
+        return (color_conv);
     end convert_to_eight_bit;
     
+
+
+
+
+
     function bcd_to_7seg (BCD_IN: integer range 0 to 9) return std_logic_vector is
     begin
         case BCD_IN is
