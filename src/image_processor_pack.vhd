@@ -6,7 +6,7 @@ use ieee.math_real.all;
 package image_processor_pack is
     constant C_PIXELS_PER_LINE		: integer := 800;
 	constant C_PIXELS_PER_FRAME		: integer := 525;
-    constant MAX_BITS       :  integer := 255
+    constant MAX_BITS       :  integer := 255;
     constant G_PIXELS_NUM   :  integer := 64;
     constant G_BITS_NUM :  integer := 6;
     constant R_B_CONV_PARAM :  real    := 8.225806452;
