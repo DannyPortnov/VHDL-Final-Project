@@ -11,6 +11,12 @@ package image_processor_pack is
     constant G_BITS_NUM :  integer := 6;
     constant R_B_CONV_PARAM :  real    := 8.225806452;
     constant G_CONV_PARAM   :  real    := 4.047619048;
+
+    constant C_RESET_ACTIVE_VALUE : std_logic := '0';
+    constant C_BUTTON_NORMAL_STATE : std_logic := '1';
+    constant C_PRESS_TIMOUT_VAL : integer := 200;
+    constant C_TIME_BETWEEN_PULSES : integer := 100;
+
     -- function that converts color from L<=8 bit to 8 bit representation
     -- To Niv: the type of a function’s arguments and return value
     -- must be specified using a type mark (std_logic_vector), not a subtype indication (std_logic_vector(7 downto 0)). 

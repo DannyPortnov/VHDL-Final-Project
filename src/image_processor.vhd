@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use WORK.image_processor_pack.all;
 
 entity image_processor is
 generic (
@@ -42,122 +43,223 @@ port (
     HDMI_TX_DE  : out std_logic;    -- Data enable signal to the HDMI controller.
                                       -- Should be 1 while in visible area and 0 during blanking time.
     HDMI_TX_CLK  : out std_logic; -- 25MHz clock signal to the HDMI controller.
+                            -- 7 Segment signals --
+    UNITY_SEG    -- 7 segment display unity digit
+    TENS_SEG     -- 7 segment display tens digit
+    HUND_SEG     -- 7 segment display hundreds digit
+    THOU_SEG     -- 7 segment display thousands digit
 );
 end entity;
 architecture behave of image_processor is 
-    component stabilizer is                -- This is the component declaration.
-    port ( 
-        D_IN        : in  std_logic;
-        CLK         : in  std_logic; 
-        RST         : in  std_logic;
-        Q_OUT       : out std_logic
-    );
-    end component;
-
-    component st_mach is                -- This is the component declaration.
-    port ( 
-        RST   : in    std_logic; -- Asynchronous system reset, active low
-        CLK   : in    std_logic; -- System clock
-        A     : in    std_logic;
-        B     : in    std_logic;
-        CAR   : out   std_logic  
-    );
-    end component;
-
-    component free_place_cnt is                -- This is the component declaration.
+    component timing_generator is                -- This is the component declaration.
     generic (
-        TOTAL_PLACES    : integer := 15
+        G_RESET_ACTIVE_VALUE        : std_logic
     );
     port (
         CLK         : in  std_logic;
         RST         : in  std_logic;
-        CAR_IN      : in  std_logic;
-        CAR_OUT     : in  std_logic;
-        ONES        : out std_logic_vector(3 downto 0) := std_logic_vector(to_unsigned(TOTAL_PLACES mod 10, 4));
-        TENS        : out std_logic_vector(3 downto 0) := std_logic_vector(to_unsigned((TOTAL_PLACES/10) mod 10, 4))
+        H_CNT       : out integer range 0 to C_PIXELS_PER_LINE-1;
+        V_CNT       : out integer range 0 to C_PIXELS_PER_FRAME-1;
+        H_SYNC      : out std_logic;
+        V_SYNC      : out std_logic;
+        VS          : out std_logic
     );
     end component;
 
-    component bcd_to_7seg is                -- This is the component declaration.
+    component push_button_if is                -- This is the component declaration.
+    generic (
+        G_RESET_ACTIVE_VALUE    : std_logic;   -- Determines the RST input polarity. 
+                                                    -- 0 – the RST input is active low 
+                                                    -- 1 – the RST input is active high
+        G_BUTTON_NORMAL_STATE   : std_logic;   -- The state of the push button when not pressed 
+        G_PRESS_TIMOUT_VAL      : integer; -- Long press value in 10ms units 
+        G_TIME_BETWEEN_PULSES   : integer  -- In 10ms units
+    );
+    port ( 
+        RST         : in std_logic;     -- Asynchronous reset. Active value according to G_RESET_ACTIVE_VALUE
+        CLK         : in std_logic;     -- System clock 25MHz
+        SW_IN       : in std_logic;     -- Push button input
+        PRESS_OUT   : out std_logic    -- Outputs active high, 1 CLK duration 
+                                        -- pulse when the pushbutton is pressed. 
+                                        -- If the button is pressed for more than 
+                                        -- 2sec, this port shall output pulses each 
+                                        -- 1 sec as long as the button is 
+                                        -- pressed.  
+    );
+    end component;
+
+    component data_generator is                -- This is the component declaration.
+    generic (
+        G_RESET_ACTIVE_VALUE        : std_logic;
+        VISIBLE_PIXELS_PER_LINE     : integer;
+        VISIBLE_PIXELS_PER_FRAME    : integer;
+        IMAGE_WIDTH                 : integer;  
+        IMAGE_HEIGHT                : integer   
+
+    );
     port (
-        BCD_IN : in   integer range 0 to 9;
-        D_OUT  : out  std_logic_vector(6 downto 0)
+        CLK            : in  std_logic;
+        RST            : in  std_logic;
+        ANGLE          : in  integer range 0 to 3;
+        IMAGE_ENA      : in  std_logic;
+        H_CNT          : in  integer range 0 to C_PIXELS_PER_LINE-1;
+        V_CNT          : in  integer range 0 to C_PIXELS_PER_FRAME-1;
+        SRAM_D         : in  std_logic_vector(15 downto 0);
+        SRAM_A         : out std_logic_vector(17 downto 0);
+        R_DATA         
+        G_DATA         
+        B_DATA         
+        DATA_DE        : out std_logic
     );
     end component;
 
-    signal stabilizer_a_output_sig      : std_logic;
-    signal stabilizer_b_output_sig      : std_logic;
-    signal car_in_output_sig            : std_logic;
-    signal car_out_output_sig           : std_logic;
-    signal free_place_ones_output_sig   : std_logic_vector(3 downto 0);
-    signal free_place_tens_output_sig   : std_logic_vector(3 downto 0);
-    signal ones_7seg_input_sig          : integer range 0 to 9;
-    signal tens_7seg_input_sig          : integer range 0 to 9;
+    component controller is                -- This is the component declaration.
+    generic (
+        G_RESET_ACTIVE_VALUE    : std_logic; -- Determines the RST input polarity. 
+                                                    -- 0 – the RST input is active low 
+                                                    -- 1 – the RST input is active high
+        G_VAL_1SEC              : integer -- In CLK units (1 [sec in ns] / 40 [ns, 1 clock period])
+    );
+    port ( 
+        RST             : in std_logic;     -- Asynchronous reset. Active value according to G_RESET_ACTIVE_VALUE
+        CLK             : in std_logic;     -- System clock 25MHz
+        ROTATE          : in std_logic;     -- Active high, 1 CLK duration rotate request
+        ROTATION_DIR    : in std_logic;     -- 0 – CW rotation direction 
+                                            -- 1 – CCW rotation direction
+        VS              : in std_logic;     -- Active high 1 CLK duration pulse 
+                                            -- indication V_SYNC falling edge. 
+        MODE            : in std_logic;     -- 0 – Manual rotation mode 
+                                            -- 1 – Automatic rotation mode
+        ANGLE           : out integer range 0 to 3;  --The angle of the displayed image
+                                                    -- 0 - 0° 
+                                                    -- 1 - 90° 
+                                                    -- 2 - 180° 
+                                                    -- 3 - 270°
+        HEX0            : out std_logic_vector(6 downto 0); -- The unity digit of the image angle
+        HEX1            : out std_logic_vector(6 downto 0); -- The tens digit of the image angle
+        HEX2            : out std_logic_vector(6 downto 0); -- The hundreds digit of the image angle
+        HEX3            : out std_logic_vector(6 downto 0) -- Should be OFF
+    );
+    end component;
+
+    component clock_generator is                -- This is the component declaration.
+    port (
+		refclk   : in  std_logic; --  refclk.clk
+		rst      : in  std_logic; --   reset.reset
+		outclk_0 : out std_logic;        -- outclk0.clk
+		locked   : out std_logic         --  locked.export
+	);
+    end component;
+
+     -- clock generator signals --
+    signal outclk_0_to_clk : std_logic;
+    signal locked_to_rst_sig : std_logic;
+
+    -- Push button interface signals -- 
+    signal press_out_to_rotate : std_logic;
+
+    -- Controller signals --
+    signal control_angle_to_data_angle : integer range 0 to 3;
+    
+    -- Timing generator signals --
+    signal timing_vs_to_controller_vs : std_logic;
+    signal timing_h_cnt_to_data_h_cnt : integer range 0 to C_PIXELS_PER_LINE-1;
+    signal timing_v_cnt_to_data_v_cnt : integer range 0 to C_PIXELS_PER_FRAME-1;
+
+    -- Data generator signals --
+    signal r_data_sig : std_logic_vector(7 downto 0);
+    signal g_data_sig : std_logic_vector(7 downto 0);
+    signal b_data_sig : std_logic_vector(7 downto 0);
+    
+    
+    signal rst_sig : std_logic;
 
 begin
+
+    rst_sig <= locked_to_rst_sig and RSTn;
     
-    ones_7seg_input_sig <= to_integer(unsigned(free_place_ones_output_sig)); -- Convert vector to integer
-    tens_7seg_input_sig <= to_integer(unsigned(free_place_tens_output_sig));
 
-
-    car_in_sm: st_mach  -- This is the component instantiation. car_in_sm is the instance name of the component st_mach
-    port map ( 
-        RST  => RST,
-        CLK  => CLK,
-        A    => stabilizer_a_output_sig,
-        B    => stabilizer_b_output_sig,
-        CAR  => car_in_output_sig
-    );
-
-    car_out_sm: st_mach  -- This is the component instantiation. car_out_sm is the instance name of the component st_mach
-    port map ( 
-        RST  => RST,
-        CLK  => CLK,
-        A    => stabilizer_b_output_sig,
-        B    => stabilizer_a_output_sig,
-        CAR  => car_out_output_sig
-    );
-
-    stabilizer_a: stabilizer            -- This is the component instantiation. stabilizer_a is the instance name of the component stabilizer
-    port map (
-        RST                 => RST,                         -- The RST input of the stabilizer_a instance of the stabilizer-a component is connected to RST
-        CLK                 => CLK,                         -- The CLK input of the stabilizer_a instance of the stabilizer-a component is connected to CLK
-        D_IN                => SENSOR_A,                    -- The D_IN input of the stabilizer_a instance of the stabilizer-a component is connected to SENSOR_A
-        Q_OUT               => stabilizer_a_output_sig      -- The Q_OUT output of the stabilizer_a instance of the stabilizer-a component is connected to stabilizer_a_output_sig
-    );
-
-    stabilizer_b: stabilizer            -- This is the component instantiation. stabilizer_a is the instance name of the component stabilizer
-    port map (
-        RST                 => RST, 
-        CLK                 => CLK, 
-        D_IN                => SENSOR_B, 
-        Q_OUT               => stabilizer_b_output_sig     -- outputs can be left opened
-    );
-
-    free_place_counter: free_place_cnt  -- This is the component instantiation. free_place_counter is the instance name of the component free_place_cnt
+    push_button: push_button_if  
     generic map (
-        TOTAL_PLACES    => G_TOTAL_PLACES
-    )
-    port map (
-        RST             => RST, 
-        CLK             => CLK, 
-        CAR_IN          => car_in_output_sig, 
-        CAR_OUT         => car_out_output_sig, 
-        ONES            => free_place_ones_output_sig, 
-        TENS            => free_place_tens_output_sig
+        G_RESET_ACTIVE_VALUE    => C_RESET_ACTIVE_VALUE, 
+        G_BUTTON_NORMAL_STATE   => C_BUTTON_NORMAL_STATE, 
+        G_PRESS_TIMOUT_VAL      => C_PRESS_TIMOUT_VAL, 
+        G_TIME_BETWEEN_PULSES   => C_TIME_BETWEEN_PULSES
+    );
+    port map ( 
+        RST         => rst_sig,    
+        CLK         => outclk_0_to_clk,     
+        SW_IN       => KEY_ROTATE,    
+        PRESS_OUT   => press_out_to_rotate  
     );
 
-    ones_to_7seg: bcd_to_7seg             -- This is the component instantiation. ones_7seg is the instance name of the component bcd_to_7seg                  
+    timing: timing_generator  
+    generic map (
+        G_RESET_ACTIVE_VALUE      => C_RESET_ACTIVE_VALUE
+    );
     port map (
-        BCD_IN  => ones_7seg_input_sig,
-        D_OUT   => ONES_7SEG
+        CLK         => outclk_0_to_clk,
+        RST         => rst_sig,
+        H_CNT       => timing_h_cnt_to_data_h_cnt,
+        V_CNT       => timing_v_cnt_to_data_v_cnt,
+        H_SYNC      => HDMI_TX_HS,
+        V_SYNC      => HDMI_TX_VS,
+        VS          => timing_vs_to_controller_vs
     );
 
-    tens_to_7seg: bcd_to_7seg             -- This is the component instantiation. tens_7seg is the instance name of the component bcd_to_7seg                  
-    port map (
-        BCD_IN  => tens_7seg_input_sig,
-        D_OUT   => TENS_7SEG
+    data: data_generator            
+    generic map (
+        G_RESET_ACTIVE_VALUE        => C_RESET_ACTIVE_VALUE,
+        VISIBLE_PIXELS_PER_LINE     => C_VISIBLE_PIXELS_PER_LINE,
+        VISIBLE_PIXELS_PER_FRAME    => C_VISIBLE_PIXELS_PER_FRAME,
+        IMAGE_WIDTH                 => C_IMAGE_WIDTH,  
+        IMAGE_HEIGHT                => C_IMAGE_HEIGHT  
+
     );
+    port map (
+        CLK            => outclk_0_to_clk,
+        RST            => rst_sig,
+        ANGLE          => control_angle_to_data_angle,
+        IMAGE_ENA      => SW_IMAGE_ENA,
+        H_CNT          => timing_h_cnt_to_data_h_cnt,
+        V_CNT          => timing_v_cnt_to_data_v_cnt,
+        SRAM_D         => SRAM_D,
+        SRAM_A         => SRAM_A,
+        R_DATA         => r_data_sig,
+        G_DATA         => g_data_sig,
+        B_DATA         => b_data_sig,
+        DATA_DE        => HDMI_TX_DE
+    );
+
+    clock: clock_generator            
+    port map (
+		refclk   => CLK,
+		rst      => rst_sig,
+		outclk_0 => outclk_0_to_clk,
+		locked   => locked_to_rst_sig
+	);
+
+    ctrl: controller  
+    generic (
+        G_RESET_ACTIVE_VALUE    => C_RESET_ACTIVE_VALUE,
+        G_VAL_1SEC              => C_VAL_1SEC
+    );
+    port ( 
+        RST             => rst_sig,
+        CLK             => outclk_0_to_clk,
+        ROTATE          => press_out_to_rotate,
+        ROTATION_DIR    => SW_ROTATION_DIR,                       
+        VS              => timing_vs_to_controller_vs,                            
+        MODE            => SW_MODE,
+        ANGLE           => control_angle_to_data_angle,
+                                                    
+        HEX0            => HEX0, -- The ones digit of the image angle
+        HEX1            => HEX1, -- The tens digit of the image angle
+        HEX2            => HEX2, -- The hundreds digit of the image angle
+        HEX3            => HEX3  -- Should be OFF
+    );
+
+    HDMI_TX <= r_data_sig & g_data_sig & b_data_sig;
 
 
 end architecture;
