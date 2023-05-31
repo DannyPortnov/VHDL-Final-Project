@@ -53,13 +53,14 @@ architecture behave of data_generator is
     signal color_index      : integer range 0 to 7;
     -- Signal for saving the last angle that was recieved
     signal last_angle       : integer range 0 to 3;
+    signal new_angle        : integer range 0 to 3;
 
     
 
 begin
 
     -- angle is updated only when we FINISH creating the image
-    last_angle <= ANGLE when ((H_CNT = 799) and (V_CNT = 524));
+    last_angle <= ANGLE when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
 
     process(CLK,RST)
     begin
