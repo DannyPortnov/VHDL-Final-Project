@@ -19,9 +19,17 @@ package image_processor_pack is
 
     constant VISIBLE_PIXELS_PER_LINE : integer := 640;
     constant VISIBLE_PIXELS_PER_FRAME : integer := 480;
-    constant IMAGE_WIDTH : integer := 512;
-    constant IMAGE_HEIGHT : integer := 512;
+    constant IMAGE_WIDTH    : integer := 512;
+    constant IMAGE_HEIGHT   : integer := 512;
+    constant IMAGE_H_OFFSET : integer := (VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH) / 2;
+    constant IMAGE_V_OFFSET : integer := (IMAGE_HEIGHT - VISIBLE_PIXELS_PER_FRAME) / 2;
 
+    -- constant IMAGE_H_START  : integer := IMAGE_H_OFFSET;
+    -- constant IMAGE_H_END    : integer := VISIBLE_PIXELS_PER_LINE - IMAGE_H_OFFSET - 1;
+    constant IMAGE_H_START  : integer := 0;
+    constant IMAGE_H_END    : integer := IMAGE_WIDTH - 1;
+    constant IMAGE_V_START  : integer := IMAGE_V_OFFSET;
+    constant IMAGE_V_END    : integer := IMAGE_HEIGHT - IMAGE_V_OFFSET - 1;
     
     --constant C_VAL_1SEC : integer := 25000000;
 
