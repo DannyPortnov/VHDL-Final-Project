@@ -5,7 +5,7 @@ use ieee.std_logic_unsigned.all;
 
 entity sim_sram is
 generic (
-	ini_file_name		: string := "UNUSED"
+	ini_file_name		: string := "mem.bin"
 );
 port (
     SRAM_ADDR       : in    std_logic_vector(17 downto 0);  -- sram address
