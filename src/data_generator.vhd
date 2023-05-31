@@ -14,11 +14,11 @@ entity data_generator is
         IMAGE_ENA      : in  std_logic;
         H_CNT          : in  integer range 0 to C_PIXELS_PER_LINE-1;
         V_CNT          : in  integer range 0 to C_PIXELS_PER_FRAME-1;
-        SRAM_D         : in  std_logic_vector(15 downto 0);
-        SRAM_A         : out std_logic_vector(17 downto 0);
-        R_DATA         : out std_logic_vector(7 downto 0);
-        G_DATA         : out std_logic_vector(7 downto 0);
-        B_DATA         : out std_logic_vector(7 downto 0);
+        SRAM_D         : in  std_logic_vector(15 downto 0) := (others => '0');
+        SRAM_A         : out std_logic_vector(17 downto 0) := (others => '0');
+        R_DATA         : out std_logic_vector(7 downto 0)  := (others => '0');
+        G_DATA         : out std_logic_vector(7 downto 0)  := (others => '0');
+        B_DATA         : out std_logic_vector(7 downto 0)  := (others => '0');
         DATA_DE        : out std_logic
     );
 end entity;
@@ -42,8 +42,8 @@ architecture behave of data_generator is
     constant SEGMENT_WIDTH : integer := VISIBLE_PIXELS_PER_LINE / 8;  -- Equal width for each color segment
 
     -- Signal declarations
-    signal rot_h_count      : integer range 0 to IMAGE_HEIGHT - 1;
-    signal rot_v_count      : integer range 0 to IMAGE_WIDTH - 1;
+    signal rot_h_count      : integer range 0 to C_PIXELS_PER_LINE-1;
+    signal rot_v_count      : integer range 0 to C_PIXELS_PER_LINE-1;
     signal start_h          : integer range 0 to (VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH)/2;
     signal start_v          : integer range 0 to (IMAGE_HEIGHT - VISIBLE_PIXELS_PER_FRAME)/2;
     -- Signals for color bar

@@ -26,13 +26,13 @@ port (
                                 -- 1 – Automatic rotation, each 1 sec. Direction according to SW_ROTATION_DIR.
                                 -- Connect to SW4.
                             -- SRAM Signals --
-    SRAM_A   : out std_logic_vector(17 downto 0); -- SRAM address
-    SRAM_D   : in std_logic_vector(15 downto 0); -- SRAM data
-    SRAM_CEn : out std_logic; -- SRAM chip enable. Should be always enabled.
-    SRAM_OEn : out std_logic; -- SRAM output enable. Should be always enabled.
-    SRAM_WEn  : out std_logic; -- SRAM write enable. Should be always disabled.
-    SRAM_UBn  : out std_logic; -- SRAM upper byte enable. Should be always disabled.
-    SRAM_LBn  : out std_logic; -- SRAM lower byte enable. Should be always disabled. 
+    SRAM_A    : out std_logic_vector(17 downto 0) := (others => '0'); -- SRAM address
+    SRAM_D    : in std_logic_vector(15 downto 0)  := (others => '0'); -- SRAM data
+    SRAM_CEn  : out std_logic := '0'; -- SRAM chip enable. Should be always enabled.
+    SRAM_OEn  : out std_logic := '0'; -- SRAM output enable. Should be always enabled.
+    SRAM_WEn  : out std_logic := '1'; -- SRAM write enable. Should be always disabled.
+    SRAM_UBn  : out std_logic := '0'; -- SRAM upper byte enable. Should be always enabled.
+    SRAM_LBn  : out std_logic := '0'; -- SRAM lower byte enable. Should be always enabled. 
                         -- HDMI Signals --                 
     HDMI_TX     : out std_logic_vector(23 downto 0);    -- 24-bit RGB pixel data to the HDMI controller.
                                                         -- HDMI_TX(23:16) – RED data
