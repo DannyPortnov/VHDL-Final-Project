@@ -3,7 +3,7 @@ if {[file exists sim/work]} {
     vdel -all
 }
 vlib work
-vcom ../src/image_processor_pack.vhd 
+-- vcom ../src/image_processor_pack.vhd 
 vcom ../src/bcd_to_7seg.vhd 
 vcom ../src/controller.vhd 
 vcom ../src/controller_tb.vhd 

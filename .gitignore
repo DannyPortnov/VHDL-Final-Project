@@ -1,6 +1,9 @@
 VHDL final 2023 02 V3.pdf
 sim/*[!.][!d][!o]
-par/*[!.][!q][!p][!f]
-par/*[!.][!q][!s][!f]
-par/*[!.][!s][!d][!c]
-par/*[!.][!q][!w][!s]
+par/*
+!par/*.qpf
+!par/*.qsf
+!par/*.sdc
+!par/*.qws
+mem.bin
+bin32/

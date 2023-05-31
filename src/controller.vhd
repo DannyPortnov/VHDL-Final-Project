@@ -1,8 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use WORK.image_processor_pack.all;
-
---constant TRUE_ANGLES : array(integer) of integer := (0, 90, 180, 270);
+--use WORK.image_processor_pack.all;
 
 entity controller is
 
@@ -121,7 +119,6 @@ begin
     end process;
 
     ANGLE <= angle_sig;
-    --true_angle <= BASE_ANGLE * angle_sig;
     HEX3 <= (others => '1');
 end behave;
 
