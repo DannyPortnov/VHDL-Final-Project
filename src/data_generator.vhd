@@ -39,7 +39,7 @@ architecture behave of data_generator is
     constant Green         : integer := 1;
     constant Black         : integer := 2;
     constant Yellow        : integer := 3; 
-    constant Black         : integer := 4;
+    constant Blue          : integer := 4;
     constant Magenta       : integer := 5;
     constant Cyan          : integer := 6;
     constant White         : integer := 7;
