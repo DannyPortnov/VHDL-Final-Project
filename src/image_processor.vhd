@@ -26,13 +26,13 @@ port (
                                 -- 1 – Automatic rotation, each 1 sec. Direction according to SW_ROTATION_DIR.
                                 -- Connect to SW4.
                             -- SRAM Signals --
-    SRAM_A   : out std_logic_vector(17 downto 0) -- SRAM address
-    SRAM_D   : in std_logic_vector(15 downto 0) -- SRAM data
-    SRAM_CEn : out std_logic -- SRAM chip enable. Should be always enabled.
-    SRAM_OEn : out std_logic -- SRAM output enable. Should be always enabled.
-    SRAM_WEn  : out std_logic -- SRAM write enable. Should be always disabled.
-    SRAM_UBn  : out std_logic -- SRAM upper byte enable. Should be always disabled.
-    SRAM_LBn  : out std_logic -- SRAM lower byte enable. Should be always disabled. 
+    SRAM_A   : out std_logic_vector(17 downto 0); -- SRAM address
+    SRAM_D   : in std_logic_vector(15 downto 0); -- SRAM data
+    SRAM_CEn : out std_logic; -- SRAM chip enable. Should be always enabled.
+    SRAM_OEn : out std_logic; -- SRAM output enable. Should be always enabled.
+    SRAM_WEn  : out std_logic; -- SRAM write enable. Should be always disabled.
+    SRAM_UBn  : out std_logic; -- SRAM upper byte enable. Should be always disabled.
+    SRAM_LBn  : out std_logic; -- SRAM lower byte enable. Should be always disabled. 
                         -- HDMI Signals --                 
     HDMI_TX     : out std_logic_vector(23 downto 0);    -- 24-bit RGB pixel data to the HDMI controller.
                                                         -- HDMI_TX(23:16) – RED data
@@ -47,7 +47,7 @@ port (
     HEX0 : out std_logic_vector(6 downto 0); -- 7 segment display unity digit
     HEX1  : out std_logic_vector(6 downto 0);    -- 7 segment display tens digit
     HEX2  : out std_logic_vector(6 downto 0);    -- 7 segment display hundreds digit
-    HEX3  : out std_logic_vector(6 downto 0);    -- 7 segment display thousands digit
+    HEX3  : out std_logic_vector(6 downto 0)    -- 7 segment display thousands digit
 );
 end entity;
 architecture behave of image_processor is 
@@ -90,12 +90,7 @@ architecture behave of image_processor is
 
     component data_generator is                -- This is the component declaration.
     generic (
-        G_RESET_ACTIVE_VALUE        : std_logic;
-        VISIBLE_PIXELS_PER_LINE     : integer;
-        VISIBLE_PIXELS_PER_FRAME    : integer;
-        IMAGE_WIDTH                 : integer;  
-        IMAGE_HEIGHT                : integer   
-
+        G_RESET_ACTIVE_VALUE        : std_logic
     );
     port (
         CLK            : in  std_logic;
@@ -106,9 +101,9 @@ architecture behave of image_processor is
         V_CNT          : in  integer range 0 to C_PIXELS_PER_FRAME-1;
         SRAM_D         : in  std_logic_vector(15 downto 0);
         SRAM_A         : out std_logic_vector(17 downto 0);
-        R_DATA         
-        G_DATA         
-        B_DATA         
+        R_DATA         : out std_logic_vector(7 downto 0);
+        G_DATA         : out std_logic_vector(7 downto 0);
+        B_DATA         : out std_logic_vector(7 downto 0);    
         DATA_DE        : out std_logic
     );
     end component;
@@ -173,11 +168,20 @@ architecture behave of image_processor is
     
     
     signal rst_sig : std_logic;
+    signal RST : std_logic;
 
 begin
 
     rst_sig <= locked_to_rst_sig and RSTn;
-    
+    RST <= not RSTn;
+
+    clock: clock_generator            
+    port map (
+		refclk   => CLK,
+		rst      => RST,
+		outclk_0 => outclk_0_to_clk,
+		locked   => locked_to_rst_sig
+	);
 
     push_button: push_button_if  
     generic map (
@@ -185,7 +189,7 @@ begin
         G_BUTTON_NORMAL_STATE   => C_BUTTON_NORMAL_STATE, 
         G_PRESS_TIMOUT_VAL      => C_PRESS_TIMOUT_VAL, 
         G_TIME_BETWEEN_PULSES   => C_TIME_BETWEEN_PULSES
-    );
+    )
     port map ( 
         RST         => rst_sig,    
         CLK         => outclk_0_to_clk,     
@@ -196,7 +200,7 @@ begin
     timing: timing_generator  
     generic map (
         G_RESET_ACTIVE_VALUE      => C_RESET_ACTIVE_VALUE
-    );
+    )
     port map (
         CLK         => outclk_0_to_clk,
         RST         => rst_sig,
@@ -209,13 +213,8 @@ begin
 
     data: data_generator            
     generic map (
-        G_RESET_ACTIVE_VALUE        => C_RESET_ACTIVE_VALUE,
-        VISIBLE_PIXELS_PER_LINE     => C_VISIBLE_PIXELS_PER_LINE,
-        VISIBLE_PIXELS_PER_FRAME    => C_VISIBLE_PIXELS_PER_FRAME,
-        IMAGE_WIDTH                 => C_IMAGE_WIDTH,  
-        IMAGE_HEIGHT                => C_IMAGE_HEIGHT  
-
-    );
+        G_RESET_ACTIVE_VALUE        => C_RESET_ACTIVE_VALUE
+    )
     port map (
         CLK            => outclk_0_to_clk,
         RST            => rst_sig,
@@ -231,20 +230,14 @@ begin
         DATA_DE        => HDMI_TX_DE
     );
 
-    clock: clock_generator            
-    port map (
-		refclk   => CLK,
-		rst      => not RSTn,
-		outclk_0 => outclk_0_to_clk,
-		locked   => locked_to_rst_sig
-	);
+
 
     ctrl: controller  
-    generic (
+    generic map (
         G_RESET_ACTIVE_VALUE    => C_RESET_ACTIVE_VALUE,
-        G_VAL_1SEC              => C_VAL_1SEC
-    );
-    port ( 
+        G_VAL_1SEC              => G_VAL_1SEC
+    )
+    port map ( 
         RST             => rst_sig,
         CLK             => outclk_0_to_clk,
         ROTATE          => press_out_to_rotate,

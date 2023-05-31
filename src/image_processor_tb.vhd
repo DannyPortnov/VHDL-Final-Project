@@ -34,13 +34,13 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
         SW_MODE   : in  std_logic;  -- 0 – Normal mode
                                     -- 1 – Automatic rotation, each 1 sec. Direction according to SW_ROTATION_DIR.
                                 -- SRAM Signals --
-        SRAM_A   : out std_logic_vector(17 downto 0) -- SRAM address
-        SRAM_D   : in std_logic_vector(15 downto 0) -- SRAM data
-        SRAM_CEn : out std_logic -- SRAM chip enable. Should be always enabled.
-        SRAM_OEn : out std_logic -- SRAM output enable. Should be always enabled.
-        SRAM_WEn  : out std_logic -- SRAM write enable. Should be always disabled.
-        SRAM_UBn  : out std_logic -- SRAM upper byte enable. Should be always disabled.
-        SRAM_LBn  : out std_logic -- SRAM lower byte enable. Should be always disabled. 
+        SRAM_A   : out std_logic_vector(17 downto 0); -- SRAM address
+        SRAM_D   : in std_logic_vector(15 downto 0); -- SRAM data
+        SRAM_CEn : out std_logic; -- SRAM chip enable. Should be always enabled.
+        SRAM_OEn : out std_logic; -- SRAM output enable. Should be always enabled.
+        SRAM_WEn  : out std_logic; -- SRAM write enable. Should be always disabled.
+        SRAM_UBn  : out std_logic; -- SRAM upper byte enable. Should be always disabled.
+        SRAM_LBn  : out std_logic; -- SRAM lower byte enable. Should be always disabled. 
                             -- HDMI Signals --                 
         HDMI_TX     : out std_logic_vector(23 downto 0);    -- 24-bit RGB pixel data to the HDMI controller.
                                                             -- HDMI_TX(23:16) – RED data
@@ -55,7 +55,7 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
         HEX0 : out std_logic_vector(6 downto 0); -- 7 segment display unity digit
         HEX1  : out std_logic_vector(6 downto 0);    -- 7 segment display tens digit
         HEX2  : out std_logic_vector(6 downto 0);    -- 7 segment display hundreds digit
-        HEX3  : out std_logic_vector(6 downto 0);    -- 7 segment display thousands digit
+        HEX3  : out std_logic_vector(6 downto 0)    -- 7 segment display thousands digit
     );
     end component;
 
@@ -94,10 +94,10 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
 begin
    
     uut: image_processor                    -- This is the component instantiation. uut is the instance name of the component counter_2_digits
-    generic (
+    generic map (
         G_VAL_1SEC   => C_VAL_1SEC
-    );
-    port (
+    )
+    port map (
                            
         CLK 	    => clk_sig,
         RSTn 	        => rst_sig,
@@ -115,15 +115,15 @@ begin
         SRAM_UBn   => sram_ubn_sig,
         SRAM_LBn  => sram_lbn_sig,
                                      
-        HDMI_TX     => open
-        HDMI_TX_VS  => open
-        HDMI_TX_HS => open
-        HDMI_TX_DE  => open
-        HDMI_TX_CLK  => open
+        HDMI_TX     => open,
+        HDMI_TX_VS  => open,
+        HDMI_TX_HS => open,
+        HDMI_TX_DE  => open,
+        HDMI_TX_CLK  => open,
         
-        HEX0 => open
-        HEX1  => open
-        HEX2  => open
+        HEX0 => open,
+        HEX1  => open,
+        HEX2  => open,
         HEX3  => open
     );
 

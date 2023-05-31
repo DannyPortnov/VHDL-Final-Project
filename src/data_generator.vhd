@@ -5,12 +5,7 @@ use WORK.image_processor_pack.all;
 
 entity data_generator is
     generic (
-        G_RESET_ACTIVE_VALUE        : std_logic := '0';
-        VISIBLE_PIXELS_PER_LINE     : integer := 640;
-        VISIBLE_PIXELS_PER_FRAME    : integer := 480;
-        IMAGE_WIDTH                 : integer := 512;  
-        IMAGE_HEIGHT                : integer := 512   
-
+        G_RESET_ACTIVE_VALUE        : std_logic := '0'
     );
     port (
         CLK            : in  std_logic;
@@ -49,13 +44,15 @@ architecture behave of data_generator is
     -- Signal declarations
     signal rot_h_count      : integer range 0 to IMAGE_HEIGHT - 1;
     signal rot_v_count      : integer range 0 to IMAGE_WIDTH - 1;
-    signal start_h          : integer range 0 to VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH;
-    signal start_v          : integer range 0 to VISIBLE_PIXELS_PER_FRAME - IMAGE_HEIGHT;
+    signal start_h          : integer range 0 to (VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH)/2;
+    signal start_v          : integer range 0 to (IMAGE_HEIGHT - VISIBLE_PIXELS_PER_FRAME)/2;
     -- Signals for color bar
     signal color_counter    : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
     signal color_index      : integer range 0 to 7;
     -- Signal for saving the last angle that was recieved
     signal last_angle       : integer range 0 to 3;
+
+    
 
 begin
     process(CLK,RST)
