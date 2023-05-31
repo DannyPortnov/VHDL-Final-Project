@@ -5,7 +5,7 @@ use WORK.image_processor_pack.all;
 
 entity data_generator is
     generic (
-        G_RESET_ACTIVE_VALUE        : std_logic := 0;
+        G_RESET_ACTIVE_VALUE        : std_logic := '0';
         VISIBLE_PIXELS_PER_LINE     : integer := 640;
         VISIBLE_PIXELS_PER_FRAME    : integer := 480;
         IMAGE_WIDTH                 : integer := 512;  
@@ -110,8 +110,8 @@ begin
 
             -- Calculate the starting coordinates to center the picture
                 -- using shift register by shifting the division to the right by 1 position, effectively dividing them by 2.
-                start_h <= to_integer(unsigned(VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH) shr 1);
-                start_v <= to_integer(unsigned(VISIBLE_PIXELS_PER_FRAME - IMAGE_HEIGHT) shr 1);
+                start_h <= (VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH) / 2;
+                start_v <= (IMAGE_HEIGHT - VISIBLE_PIXELS_PER_FRAME) / 2;
 
             
             -- image from the memory is displayed 
