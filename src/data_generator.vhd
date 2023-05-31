@@ -43,7 +43,8 @@ architecture behave of data_generator is
     constant Magenta       : integer := 5;
     constant Cyan          : integer := 6;
     constant White         : integer := 7;
-    constant SEGMENT_WIDTH : integer := VISIBLE_PIXELS_PER_LINE shr 3;  -- Equal width for each color segment
+    -- length of a color segment
+    constant SEGMENT_WIDTH : integer := VISIBLE_PIXELS_PER_LINE / 8;  -- Equal width for each color segment
 
     -- Signal declarations
     signal rot_h_count      : integer range 0 to IMAGE_HEIGHT - 1;
