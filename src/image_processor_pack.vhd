@@ -16,6 +16,7 @@ package image_processor_pack is
     constant C_BUTTON_NORMAL_STATE : std_logic := '1';
     constant C_PRESS_TIMOUT_VAL : integer := 200;
     constant C_TIME_BETWEEN_PULSES : integer := 100;
+    --constant C_VAL_1SEC : integer := 25000000;
 
     -- function that converts color from L<=8 bit to 8 bit representation
     -- To Niv: the type of a function’s arguments and return value
