@@ -44,10 +44,10 @@ port (
                                       -- Should be 1 while in visible area and 0 during blanking time.
     HDMI_TX_CLK  : out std_logic; -- 25MHz clock signal to the HDMI controller.
                             -- 7 Segment signals --
-    UNITY_SEG    -- 7 segment display unity digit
-    TENS_SEG     -- 7 segment display tens digit
-    HUND_SEG     -- 7 segment display hundreds digit
-    THOU_SEG     -- 7 segment display thousands digit
+    HEX0 : out std_logic_vector(6 downto 0); -- 7 segment display unity digit
+    HEX1  : out std_logic_vector(6 downto 0);    -- 7 segment display tens digit
+    HEX2  : out std_logic_vector(6 downto 0);    -- 7 segment display hundreds digit
+    HEX3  : out std_logic_vector(6 downto 0);    -- 7 segment display thousands digit
 );
 end entity;
 architecture behave of image_processor is 
@@ -234,7 +234,7 @@ begin
     clock: clock_generator            
     port map (
 		refclk   => CLK,
-		rst      => rst_sig,
+		rst      => not RSTn,
 		outclk_0 => outclk_0_to_clk,
 		locked   => locked_to_rst_sig
 	);

@@ -52,33 +52,105 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
                                           -- Should be 1 while in visible area and 0 during blanking time.
         HDMI_TX_CLK  : out std_logic; -- 25MHz clock signal to the HDMI controller.
                                 -- 7 Segment signals --
-        UNITY_SEG    -- 7 segment display unity digit
-        TENS_SEG     -- 7 segment display tens digit
-        HUND_SEG     -- 7 segment display hundreds digit
-        THOU_SEG     -- 7 segment display thousands digit
+        HEX0 : out std_logic_vector(6 downto 0); -- 7 segment display unity digit
+        HEX1  : out std_logic_vector(6 downto 0);    -- 7 segment display tens digit
+        HEX2  : out std_logic_vector(6 downto 0);    -- 7 segment display hundreds digit
+        HEX3  : out std_logic_vector(6 downto 0);    -- 7 segment display thousands digit
     );
     end component;
 
--- signals declaration  
+    component sim_sram is
+    generic (
+        ini_file_name		: string
+    );
+    port (
+        SRAM_ADDR       : in    std_logic_vector(17 downto 0);  -- sram address
+        SRAM_DQ         : inout std_logic_vector(15 downto 0);  -- sram data
+        SRAM_WE_N       : in    std_logic;                      -- sram write enable 
+        SRAM_OE_N       : in    std_logic;                      -- sram output enable
+        SRAM_UB_N       : in    std_logic;                      -- sram upper byte enable 
+        SRAM_LB_N       : in    std_logic;                      -- sram lower byte enable
+        SRAM_CE_N       : in    std_logic                       -- sram chip enable
+    );
+    end component;
+
+
+    -- signals declaration  
     signal clk_sig              : std_logic := '0';
     signal rst_sig              : std_logic := not C_RESET_ACTIVE_VALUE;
     signal key_rotate_sig       : std_logic := C_BUTTON_NORMAL_STATE;
     signal sw_rotation_dir_sig  : std_logic := '0';
     signal sw_image_ena_sig     : std_logic := '1';
     signal sw_mode_sig          : std_logic := '0';
-    
+    signal sram_a_sig           : std_logic_vector(17 downto 0) := (others => '0');
+    signal sram_d_sig           : std_logic_vector(15 downto 0) := (others => '0');
+    signal sram_cen_sig         : std_logic := '1';
+    signal sram_oen_sig         : std_logic := '1';
+    signal sram_wen_sig         : std_logic := '0';
+    signal sram_ubn_sig         : std_logic := '0';
+    signal sram_lbn_sig         : std_logic := '0';
+
+
 begin
    
     uut: image_processor                    -- This is the component instantiation. uut is the instance name of the component counter_2_digits
-    generic map (
-        G_RESET_ACTIVE_VALUE => C_RESET_ACTIVE_VALUE
-    )
-    port map (
-        RST                => rst_sig, -- The RST input of the uut instance of the image_processor component is connected to rst_sig signal
-        CLK                => clk_sig -- The CLK input of the uut instance of the image_processor component is connected to clk_sig signal
+    generic (
+        G_VAL_1SEC   => C_VAL_1SEC
+    );
+    port (
+                           
+        CLK 	    => clk_sig,
+        RSTn 	        => rst_sig,
+                                   
+        KEY_ROTATE    => key_rotate_sig,
+        SW_ROTATION_DIR    => sw_rotation_dir_sig,
+        SW_IMAGE_ENA   => sw_image_ena_sig,
+        SW_MODE   => sw_mode_sig,
+                    
+        SRAM_A   => sram_a_sig,
+        SRAM_D   => sram_d_sig,
+        SRAM_CEn => sram_cen_sig,
+        SRAM_OEn => sram_oen_sig,
+        SRAM_WEn    => sram_wen_sig,
+        SRAM_UBn   => sram_ubn_sig,
+        SRAM_LBn  => sram_lbn_sig,
+                                     
+        HDMI_TX     => open
+        HDMI_TX_VS  => open
+        HDMI_TX_HS => open
+        HDMI_TX_DE  => open
+        HDMI_TX_CLK  => open
+        
+        HEX0 => open
+        HEX1  => open
+        HEX2  => open
+        HEX3  => open
     );
 
-    
+    sram: sim_sram
+    generic map (
+        ini_file_name => "mem.bin"
+    )
+    port map (
+        SRAM_ADDR       => sram_a_sig,
+        SRAM_DQ         => sram_d_sig,
+        SRAM_WE_N       => sram_wen_sig,
+        SRAM_OE_N       => sram_oen_sig,
+        SRAM_UB_N       => sram_ubn_sig,
+        SRAM_LB_N       => sram_lbn_sig,
+        SRAM_CE_N       => sram_cen_sig
+    );
+
+    process
+    begin
+        wait for 10*C_CLK_PRD;
+        key_rotate_sig <= not key_rotate_sig; -- Press button
+        wait for C_CLK_PRD;
+        key_rotate_sig <= not key_rotate_sig; -- Release button
+
+        
+    end process;
+
  
     clk_sig <= not clk_sig after C_CLK_PRD / 2;     -- clk_sig toggles every C_CLK_PRD/2 ns
 
