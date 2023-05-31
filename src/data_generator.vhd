@@ -53,7 +53,7 @@ architecture behave of data_generator is
     signal color_index      : integer range 0 to 7;
     -- Signal for saving the last angle that was recieved
     signal last_angle       : integer range 0 to 3;
-    signal new_angle        : integer range 0 to 3;
+    -- signal new_angle        : integer range 0 to 3;
 
     
 
