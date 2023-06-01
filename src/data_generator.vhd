@@ -53,6 +53,8 @@ architecture behave of data_generator is
     signal color_index      : integer range 0 to 7;
     -- Signal for saving the last angle that was recieved
     signal last_angle       : integer range 0 to 3;
+    -- Signal for saving the last IMAGE ENABLE that was recieved
+    signal last_image_ena       : integer range 0 to 3;
     -- signal new_angle        : integer range 0 to 3;
 
     
@@ -61,6 +63,8 @@ begin
 
     -- angle is updated only when we FINISH creating the image
     last_angle <= ANGLE when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
+    -- Image Enable is updated only when we FINISH creating the image
+    last_image_ena <= IMAGE_ENA when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
 
     process(CLK,RST)
     begin
@@ -148,7 +152,7 @@ begin
                 -- rot_v_count_offset <= rot_v_count + IMAGE_V_OFFSET;
             
             -- image from the memory is displayed 
-                if IMAGE_ENA = '1' then
+                if last_image_ena = '1' then
                 -- old implementation:
                     -- draw the image in the center of the screen- Apply the starting coordinates offset
                     if ((rot_h_count >= IMAGE_H_START) and (rot_h_count <= IMAGE_H_END))
@@ -174,7 +178,7 @@ begin
              
 
             -- color bar is displayed
-                elsif IMAGE_ENA = '0' then
+                elsif last_image_ena = '0' then
 
                 -- Increment color_counter
                     if color_counter < VISIBLE_PIXELS_PER_LINE - 1 then
