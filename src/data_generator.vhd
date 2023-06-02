@@ -14,11 +14,11 @@ entity data_generator is
         IMAGE_ENA      : in  std_logic;
         H_CNT          : in  integer range 0 to C_PIXELS_PER_LINE-1;
         V_CNT          : in  integer range 0 to C_PIXELS_PER_FRAME-1;
-        SRAM_D         : in  std_logic_vector(15 downto 0);
-        SRAM_A         : out std_logic_vector(17 downto 0);
-        R_DATA         : out std_logic_vector(7 downto 0);
-        G_DATA         : out std_logic_vector(7 downto 0);
-        B_DATA         : out std_logic_vector(7 downto 0);
+        SRAM_D         : in  std_logic_vector(15 downto 0) := (others => '0');
+        SRAM_A         : out std_logic_vector(17 downto 0) := (others => '0');
+        R_DATA         : out std_logic_vector(7 downto 0)  := (others => '0');
+        G_DATA         : out std_logic_vector(7 downto 0)  := (others => '0');
+        B_DATA         : out std_logic_vector(7 downto 0)  := (others => '0');
         DATA_DE        : out std_logic
     );
 end entity;
@@ -42,27 +42,36 @@ architecture behave of data_generator is
     constant SEGMENT_WIDTH : integer := VISIBLE_PIXELS_PER_LINE / 8;  -- Equal width for each color segment
 
     -- Signal declarations
-    signal rot_h_count      : integer range 0 to IMAGE_HEIGHT - 1;
-    signal rot_v_count      : integer range 0 to IMAGE_WIDTH - 1;
-    signal start_h          : integer range 0 to (VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH)/2;
-    signal start_v          : integer range 0 to (IMAGE_HEIGHT - VISIBLE_PIXELS_PER_FRAME)/2;
+    signal rot_h_count             : integer range 0 to C_PIXELS_PER_LINE-1;
+    signal rot_v_count             : integer range 0 to C_PIXELS_PER_LINE-1;
+    -- signal rot_h_count_offset      : integer range 0 to C_PIXELS_PER_LINE-1;
+    -- signal rot_v_count_offset      : integer range 0 to C_PIXELS_PER_LINE-1;
+    -- signal start_h                 : integer range 0 to (VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH)/2;
+    -- signal start_v                 : integer range 0 to (IMAGE_HEIGHT - VISIBLE_PIXELS_PER_FRAME)/2;
     -- Signals for color bar
     signal color_counter    : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
     signal color_index      : integer range 0 to 7;
     -- Signal for saving the last angle that was recieved
     signal last_angle       : integer range 0 to 3;
+    -- Signal for saving the last IMAGE ENABLE that was recieved
+    signal last_image_ena       : integer range 0 to 3;
+    -- signal new_angle        : integer range 0 to 3;
 
     
 
 begin
+
+    -- angle is updated only when we FINISH creating the image
+    last_angle <= ANGLE when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
+    -- Image Enable is updated only when we FINISH creating the image
+    last_image_ena <= IMAGE_ENA when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
+
     process(CLK,RST)
     begin
         --reset output
         if RST = G_RESET_ACTIVE_VALUE then    
             rot_h_count <= 0;
             rot_v_count <= 0;
-            start_h <= 0;
-            start_v <= 0;
             color_counter <= 0;
             color_index <= 0;
         
@@ -79,46 +88,77 @@ begin
         -- ******************************************************************
         -- todo: need to check if we finish drawing even if the angle is
         -- changing during the drawing process:
-
+            -- NOT A GOOD IMPLEMENTATION- I MOVED IT OUT FROM THE PROCESS
                 -- angle is updated only when we start creating the image
-                if H_CNT = 0 and V_CNT = 0 then
-                    last_angle <= ANGLE;
-                end if;
+                -- if H_CNT = 0 and V_CNT = 0 then
+                --     last_angle <= ANGLE;
+                -- end if;
         -- ******************************************************************
-
 
             -- Determine the rotated coordinates based on the selected rotation angle
                 case last_angle is
                     when zero_deg =>
                         rot_h_count <= H_CNT;
                         rot_v_count <= V_CNT;
+
                     when ninety_deg =>
-                        rot_h_count <= V_CNT;
-                        rot_v_count <= IMAGE_WIDTH - H_CNT - 1;
+                        if V_CNT >= IMAGE_HEIGHT then
+                            rot_h_count <= IMAGE_HEIGHT - 1;
+                        else
+                            rot_h_count <= IMAGE_HEIGHT - V_CNT - 1;
+                        end if;
+                        
+                        if H_CNT >= IMAGE_WIDTH then
+                            rot_v_count <= IMAGE_WIDTH - 1;
+                        else
+                            rot_v_count <= H_CNT;
+                        end if;        
+
                     when hundred_eighty_deg =>
-                        rot_h_count <= IMAGE_WIDTH - H_CNT - 1;
-                        rot_v_count <= IMAGE_HEIGHT - V_CNT - 1;
+                        if H_CNT >= IMAGE_WIDTH then
+                            rot_h_count <= IMAGE_WIDTH - 1;
+                        else
+                            rot_h_count <= IMAGE_WIDTH - H_CNT - 1;
+                        end if;
+                        
+                        if V_CNT >= IMAGE_HEIGHT then
+                            rot_v_count <= IMAGE_HEIGHT - 1;
+                        else
+                            rot_v_count <= IMAGE_HEIGHT - V_CNT - 1;
+                        end if;
+
                     when two_hunderd_seventy_deg =>
-                        rot_h_count <= IMAGE_HEIGHT - V_CNT - 1;
-                        rot_v_count <= H_CNT;
-                    when others =>  -- check if necessary
+                        if V_CNT >= IMAGE_HEIGHT then
+                            rot_h_count <= 0;
+                        else
+                            rot_h_count <= V_CNT;
+                        end if;
+                        
+                        if H_CNT >= IMAGE_WIDTH then
+                            rot_v_count <= IMAGE_WIDTH - 1;
+                        else
+                            rot_v_count <= IMAGE_WIDTH - H_CNT - 1;
+                        end if;
+                        
+                    when others =>
                         rot_h_count <= 0;
                         rot_v_count <= 0;
                 end case;
-
-            -- Calculate the starting coordinates to center the picture
-                -- using shift register by shifting the division to the right by 1 position, effectively dividing them by 2.
-                start_h <= (VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH) / 2;
-                start_v <= (IMAGE_HEIGHT - VISIBLE_PIXELS_PER_FRAME) / 2;
-
+                
+    
+                    
+                -- Apply the starting coordinates offset
+                -- rot_h_count_offset <= rot_h_count;
+                -- rot_v_count_offset <= rot_v_count + IMAGE_V_OFFSET;
             
             -- image from the memory is displayed 
-                if IMAGE_ENA = '1' then
+                if last_image_ena = '1' then
+                -- old implementation:
                     -- draw the image in the center of the screen- Apply the starting coordinates offset
-                    if ((H_CNT >= start_h) and (H_CNT <= VISIBLE_PIXELS_PER_LINE - start_h))
-                            and ((V_CNT >= start_v) and (V_CNT <= VISIBLE_PIXELS_PER_FRAME - start_v)) then
+                    if ((rot_h_count >= IMAGE_H_START) and (rot_h_count <= IMAGE_H_END))
+                            and (((rot_v_count + IMAGE_V_OFFSET) >= IMAGE_V_START) and ((rot_v_count + IMAGE_V_OFFSET) <= IMAGE_V_END)) then
                         -- Access the corresponding pixel from SRAM using the rotated coordinates
-                        SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
+                        SRAM_A <= std_logic_vector(to_unsigned((rot_v_count + IMAGE_V_OFFSET) * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
                         R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0))), 5);
                         G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5))), 6);
                         B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11))), 5);
@@ -129,14 +169,16 @@ begin
                     
                     -- draw a black pixel if we exceed the image coordinates
                     else
+                        DATA_DE <= '0';
                         R_DATA <= (others => '0');
                         G_DATA <= (others => '0');
                         B_DATA <= (others => '0');
                     end if;
-
+                    
+             
 
             -- color bar is displayed
-                elsif IMAGE_ENA = '0' then
+                elsif last_image_ena = '0' then
 
                 -- Increment color_counter
                     if color_counter < VISIBLE_PIXELS_PER_LINE - 1 then

@@ -8,7 +8,7 @@ end entity;
 architecture behave of image_processor_tb is    -- This is the architecture of the testbench
 
     -- constants declaration    
-    constant C_CLK_PRD              : time    := 20 ns; -- 50MHz clock period
+    constant C_CLK_PRD              : time    := 40 ns; -- 50MHz clock period
     constant C_VAL_1SEC             : integer := 3;
     constant C_RESET_ACTIVE_VALUE   : std_logic := '0';
 
@@ -34,13 +34,13 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
         SW_MODE   : in  std_logic;  -- 0 – Normal mode
                                     -- 1 – Automatic rotation, each 1 sec. Direction according to SW_ROTATION_DIR.
                                 -- SRAM Signals --
-        SRAM_A   : out std_logic_vector(17 downto 0); -- SRAM address
-        SRAM_D   : in std_logic_vector(15 downto 0); -- SRAM data
+        SRAM_A   : out std_logic_vector(17 downto 0) := (others => '0'); -- SRAM address
+        SRAM_D   : in std_logic_vector(15 downto 0) := (others => '0'); -- SRAM data
         SRAM_CEn : out std_logic; -- SRAM chip enable. Should be always enabled.
         SRAM_OEn : out std_logic; -- SRAM output enable. Should be always enabled.
         SRAM_WEn  : out std_logic; -- SRAM write enable. Should be always disabled.
-        SRAM_UBn  : out std_logic; -- SRAM upper byte enable. Should be always disabled.
-        SRAM_LBn  : out std_logic; -- SRAM lower byte enable. Should be always disabled. 
+        SRAM_UBn  : out std_logic; -- SRAM upper byte enable. Should be always enabled.
+        SRAM_LBn  : out std_logic; -- SRAM lower byte enable. Should be always enabled. 
                             -- HDMI Signals --                 
         HDMI_TX     : out std_logic_vector(23 downto 0);    -- 24-bit RGB pixel data to the HDMI controller.
                                                             -- HDMI_TX(23:16) – RED data
@@ -59,20 +59,20 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
     );
     end component;
 
-    component sim_sram is
-    generic (
-        ini_file_name		: string
-    );
-    port (
-        SRAM_ADDR       : in    std_logic_vector(17 downto 0);  -- sram address
-        SRAM_DQ         : inout std_logic_vector(15 downto 0);  -- sram data
-        SRAM_WE_N       : in    std_logic;                      -- sram write enable 
-        SRAM_OE_N       : in    std_logic;                      -- sram output enable
-        SRAM_UB_N       : in    std_logic;                      -- sram upper byte enable 
-        SRAM_LB_N       : in    std_logic;                      -- sram lower byte enable
-        SRAM_CE_N       : in    std_logic                       -- sram chip enable
-    );
-    end component;
+    -- component sim_sram is
+    -- generic (
+    --     ini_file_name		: string
+    -- );
+    -- port (
+    --     SRAM_ADDR       : in    std_logic_vector(17 downto 0);  -- sram address
+    --     SRAM_DQ         : inout std_logic_vector(15 downto 0);  -- sram data
+    --     SRAM_WE_N       : in    std_logic;                      -- sram write enable 
+    --     SRAM_OE_N       : in    std_logic;                      -- sram output enable
+    --     SRAM_UB_N       : in    std_logic;                      -- sram upper byte enable 
+    --     SRAM_LB_N       : in    std_logic;                      -- sram lower byte enable
+    --     SRAM_CE_N       : in    std_logic                       -- sram chip enable
+    -- );
+    -- end component;
 
 
     -- signals declaration  
@@ -84,9 +84,9 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
     signal sw_mode_sig          : std_logic := '0';
     signal sram_a_sig           : std_logic_vector(17 downto 0) := (others => '0');
     signal sram_d_sig           : std_logic_vector(15 downto 0) := (others => '0');
-    signal sram_cen_sig         : std_logic := '1';
-    signal sram_oen_sig         : std_logic := '1';
-    signal sram_wen_sig         : std_logic := '0';
+    signal sram_cen_sig         : std_logic := '0';
+    signal sram_oen_sig         : std_logic := '0';
+    signal sram_wen_sig         : std_logic := '1';
     signal sram_ubn_sig         : std_logic := '0';
     signal sram_lbn_sig         : std_logic := '0';
 
@@ -109,6 +109,11 @@ begin
                     
         SRAM_A   => sram_a_sig,
         SRAM_D   => sram_d_sig,
+        -- SRAM_CEn => open,
+        -- SRAM_OEn => open,
+        -- SRAM_WEn    => open,
+        -- SRAM_UBn   => open,
+        -- SRAM_LBn  => open,
         SRAM_CEn => sram_cen_sig,
         SRAM_OEn => sram_oen_sig,
         SRAM_WEn    => sram_wen_sig,
@@ -127,7 +132,8 @@ begin
         HEX3  => open
     );
 
-    sram: sim_sram
+
+    sram_inst: entity work.sim_sram
     generic map (
         ini_file_name => "mem.bin"
     )
