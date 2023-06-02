@@ -54,7 +54,7 @@ architecture behave of data_generator is
     -- Signal for saving the last angle that was recieved
     signal last_angle       : integer range 0 to 3;
     -- Signal for saving the last IMAGE ENABLE that was recieved
-    signal last_image_ena       : integer range 0 to 3;
+    signal last_image_ena   : std_logic;
     -- signal new_angle        : integer range 0 to 3;
 
     
