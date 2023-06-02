@@ -149,10 +149,10 @@ begin
 
     process
     begin
-        wait for 10*C_CLK_PRD;
-        key_rotate_sig <= not key_rotate_sig; -- Press button
-        wait for C_CLK_PRD;
-        key_rotate_sig <= not key_rotate_sig; -- Release button
+        wait for 10 us;
+        -- key_rotate_sig <= not key_rotate_sig; -- Press button
+        -- wait for C_CLK_PRD;
+        -- key_rotate_sig <= not key_rotate_sig; -- Release button
 
         
     end process;
