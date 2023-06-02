@@ -24,12 +24,14 @@ entity data_generator is
 end entity;
 
 architecture behave of data_generator is 
-    -- Constants declarations
+    -- Constants declarations:
+
+    -- Constants for each degree value:
     constant zero_deg                    : integer := 0;
     constant ninety_deg                  : integer := 1;
     constant hundred_eighty_deg          : integer := 2;
     constant two_hunderd_seventy_deg     : integer := 3;
-    -- Constants for color bar
+    -- Constants for Color Bar (color's representation with integers):
     constant Red           : integer := 0;
     constant Green         : integer := 1;
     constant Black         : integer := 2;
@@ -41,13 +43,8 @@ architecture behave of data_generator is
     -- length of a color segment
     constant SEGMENT_WIDTH : integer := VISIBLE_PIXELS_PER_LINE / 8;  -- Equal width for each color segment
 
-    -- Signal declarations
-    signal rot_h_count             : integer range 0 to C_PIXELS_PER_LINE-1;
-    signal rot_v_count             : integer range 0 to C_PIXELS_PER_LINE-1;
-    -- signal rot_h_count_offset      : integer range 0 to C_PIXELS_PER_LINE-1;
-    -- signal rot_v_count_offset      : integer range 0 to C_PIXELS_PER_LINE-1;
-    -- signal start_h                 : integer range 0 to (VISIBLE_PIXELS_PER_LINE - IMAGE_WIDTH)/2;
-    -- signal start_v                 : integer range 0 to (IMAGE_HEIGHT - VISIBLE_PIXELS_PER_FRAME)/2;
+    -- Signal declarations:
+
     -- Signals for color bar
     signal color_counter    : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
     signal color_index      : integer range 0 to 7;
@@ -55,6 +52,8 @@ architecture behave of data_generator is
     signal last_angle       : integer range 0 to 3;
     -- Signal for saving the last IMAGE ENABLE that was recieved
     signal last_image_ena   : std_logic;
+    -- Signal for creating dea the last IMAGE ENABLE that was recieved
+    signal data_ena_sig     : std_logic;
     -- signal new_angle        : integer range 0 to 3;
 
     
@@ -64,119 +63,66 @@ begin
     -- angle is updated only when we FINISH creating the image
     last_angle <= ANGLE when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
     -- Image Enable is updated only when we FINISH creating the image
-    last_image_ena <= IMAGE_ENA when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
+    last_image_ena <= IMAGE_ENA when ((H_CNT = 0) and (V_CNT = 0));
+    
 
     process(CLK,RST)
     begin
         --reset output
         if RST = G_RESET_ACTIVE_VALUE then    
-            rot_h_count <= 0;
-            rot_v_count <= 0;
             color_counter <= 0;
             color_index <= 0;
-        
+            data_ena_sig <= '0';
         
         elsif rising_edge(CLK) then
             
             -- Check if the pixel is within the visible area
             if (H_CNT < VISIBLE_PIXELS_PER_LINE) and (V_CNT < VISIBLE_PIXELS_PER_FRAME) then
                 -- the pixel is inside the visible area
-                DATA_DE <= '1';
+                data_ena_sig <= '1';
                 
-                
-                
-        -- ******************************************************************
-        -- todo: need to check if we finish drawing even if the angle is
-        -- changing during the drawing process:
-            -- NOT A GOOD IMPLEMENTATION- I MOVED IT OUT FROM THE PROCESS
-                -- angle is updated only when we start creating the image
-                -- if H_CNT = 0 and V_CNT = 0 then
-                --     last_angle <= ANGLE;
-                -- end if;
-        -- ******************************************************************
-
-            -- Determine the rotated coordinates based on the selected rotation angle
-                case last_angle is
-                    when zero_deg =>
-                        rot_h_count <= H_CNT;
-                        rot_v_count <= V_CNT;
-
-                    when ninety_deg =>
-                        if V_CNT >= IMAGE_HEIGHT then
-                            rot_h_count <= IMAGE_HEIGHT - 1;
-                        else
-                            rot_h_count <= IMAGE_HEIGHT - V_CNT - 1;
-                        end if;
-                        
-                        if H_CNT >= IMAGE_WIDTH then
-                            rot_v_count <= IMAGE_WIDTH - 1;
-                        else
-                            rot_v_count <= H_CNT;
-                        end if;        
-
-                    when hundred_eighty_deg =>
-                        if H_CNT >= IMAGE_WIDTH then
-                            rot_h_count <= IMAGE_WIDTH - 1;
-                        else
-                            rot_h_count <= IMAGE_WIDTH - H_CNT - 1;
-                        end if;
-                        
-                        if V_CNT >= IMAGE_HEIGHT then
-                            rot_v_count <= IMAGE_HEIGHT - 1;
-                        else
-                            rot_v_count <= IMAGE_HEIGHT - V_CNT - 1;
-                        end if;
-
-                    when two_hunderd_seventy_deg =>
-                        if V_CNT >= IMAGE_HEIGHT then
-                            rot_h_count <= 0;
-                        else
-                            rot_h_count <= V_CNT;
-                        end if;
-                        
-                        if H_CNT >= IMAGE_WIDTH then
-                            rot_v_count <= IMAGE_WIDTH - 1;
-                        else
-                            rot_v_count <= IMAGE_WIDTH - H_CNT - 1;
-                        end if;
-                        
-                    when others =>
-                        rot_h_count <= 0;
-                        rot_v_count <= 0;
-                end case;
-                
-    
-                    
-                -- Apply the starting coordinates offset
-                -- rot_h_count_offset <= rot_h_count;
-                -- rot_v_count_offset <= rot_v_count + IMAGE_V_OFFSET;
-            
-            -- image from the memory is displayed 
+                -- image from the memory is displayed 
                 if last_image_ena = '1' then
-                -- old implementation:
                     -- draw the image in the center of the screen- Apply the starting coordinates offset
-                    if ((rot_h_count >= IMAGE_H_START) and (rot_h_count <= IMAGE_H_END))
-                            and (((rot_v_count + IMAGE_V_OFFSET) >= IMAGE_V_START) and ((rot_v_count + IMAGE_V_OFFSET) <= IMAGE_V_END)) then
-                        -- Access the corresponding pixel from SRAM using the rotated coordinates
-                        SRAM_A <= std_logic_vector(to_unsigned((rot_v_count + IMAGE_V_OFFSET) * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
+                    if ((H_CNT >= IMAGE_H_START) and (H_CNT <= IMAGE_H_END))
+                        and ((V_CNT >= IMAGE_V_START) and (V_CNT <= IMAGE_V_END)) then  -- IMAGE_V_STRAT=0, IMAGE_V_END = 479
+                    -- Determine the rotated coordinates based on the selected rotation angle
+                        case last_angle is
+                            when zero_deg =>
+                                -- Access the corresponding pixel from SRAM using the rotated coordinates
+                                SRAM_A <= std_logic_vector(to_unsigned((V_CNT + IMAGE_V_OFFSET) * IMAGE_WIDTH + H_CNT - IMAGE_H_OFFSET, SRAM_A'length));
+
+                            when ninety_deg =>
+                                -- Access the corresponding pixel from SRAM using the rotated coordinates
+                                SRAM_A <= std_logic_vector(to_unsigned((H_CNT - IMAGE_H_OFFSET) * IMAGE_WIDTH + (IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET, SRAM_A'length));
+
+                            when hundred_eighty_deg =>
+                                -- Access the corresponding pixel from SRAM using the rotated coordinates
+                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET) * IMAGE_WIDTH + ((IMAGE_WIDTH - 1) - H_CNT + IMAGE_H_OFFSET), SRAM_A'length));
+                                                                
+                            when two_hunderd_seventy_deg =>
+                                -- Access the corresponding pixel from SRAM using the rotated coordinates
+                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_WIDTH - 1) - H_CNT + IMAGE_H_OFFSET) * IMAGE_WIDTH - (V_CNT + IMAGE_V_OFFSET), SRAM_A'length));
+                                
+                        end case;
+                        
                         R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0))), 5);
                         G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5))), 6);
                         B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11))), 5);
-                        -- SRAM_A <= std_logic_vector(to_unsigned(rot_v_count * IMAGE_WIDTH + rot_h_count, SRAM_A'length));
                         -- R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0))), SRAM_D(4 downto 0)'length);
                         -- G_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(10 downto 5))), SRAM_D(10 downto 5)'length);
                         -- B_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(15 downto 11))), SRAM_D(15 downto 11)'length);
                     
+
                     -- draw a black pixel if we exceed the image coordinates
                     else
-                        DATA_DE <= '0';
+                        data_ena_sig <= '0';
                         R_DATA <= (others => '0');
                         G_DATA <= (others => '0');
                         B_DATA <= (others => '0');
                     end if;
                     
-             
-
+                        
             -- color bar is displayed
                 elsif last_image_ena = '0' then
 
@@ -239,13 +185,13 @@ begin
 
             else
             -- the pixel is not in the visible area -> blank
-                DATA_DE <= '0';     
+                data_ena_sig <= '0';     
                 R_DATA <= (others => '0');
                 G_DATA <= (others => '0');
                 B_DATA <= (others => '0');
             end if;
 
-
+        DATA_DE <= data_ena_sig;
 
         end if;
     end process;
