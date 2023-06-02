@@ -46,7 +46,7 @@ architecture behave of data_generator is
     -- Signal declarations:
 
     -- Signals for color bar
-    signal color_counter    : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
+    -- signal color_counter    : integer range 0 to VISIBLE_PIXELS_PER_LINE-1;
     signal color_index      : integer range 0 to 7;
     -- Signal for saving the last angle that was recieved
     signal last_angle       : integer range 0 to 3;
@@ -70,7 +70,7 @@ begin
     begin
         --reset output
         if RST = G_RESET_ACTIVE_VALUE then    
-            color_counter <= 0;
+            -- color_counter <= 0;
             color_index <= 0;
             data_ena_sig <= '0';
         
@@ -80,7 +80,7 @@ begin
             if (H_CNT < VISIBLE_PIXELS_PER_LINE) and (V_CNT < VISIBLE_PIXELS_PER_FRAME) then
                 -- the pixel is inside the visible area
                 data_ena_sig <= '1';
-                
+                DATA_DE <= data_ena_sig;
                 -- image from the memory is displayed 
                 if last_image_ena = '1' then
                     -- draw the image in the center of the screen- Apply the starting coordinates offset
@@ -117,6 +117,7 @@ begin
                     -- draw a black pixel if we exceed the image coordinates
                     else
                         data_ena_sig <= '0';
+                        DATA_DE <= data_ena_sig;
                         R_DATA <= (others => '0');
                         G_DATA <= (others => '0');
                         B_DATA <= (others => '0');
@@ -125,22 +126,10 @@ begin
                         
             -- color bar is displayed
                 elsif last_image_ena = '0' then
-
-                -- Increment color_counter
-                    if color_counter < VISIBLE_PIXELS_PER_LINE - 1 then
-                        color_counter <= color_counter + 1;
-                    else
-                        color_counter <= 0;
-                        -- Increment color_index
-                        if color_index < 7 then
-                            color_index <= color_index + 1;
-                        else
-                            color_index <= 0;
-                        end if;
-                    end if;
-
-                -- Assign color based on the color_index and color_counter
-                    if (color_counter >= SEGMENT_WIDTH * color_index) and (color_counter < SEGMENT_WIDTH * (color_index + 1)) then
+                    DATA_DE <= '1';
+                    -- color_counter <= H_CNT;
+                -- Assign color based on the color_index and color_counter = H_CNT
+                    if (H_CNT >= SEGMENT_WIDTH * color_index) and (H_CNT < SEGMENT_WIDTH * (color_index + 1)) then
                         case color_index is
                             when Red =>  
                                 R_DATA <= "11111111";
@@ -182,16 +171,38 @@ begin
                     --     B_DATA <= (others => '0');
                     end if;
                 end if;
+                
+                -- -- Increment color_counter
+                -- if color_counter < VISIBLE_PIXELS_PER_LINE - 1 then
+                --     color_counter <= color_counter + 1;
+                -- else
+                --     color_counter <= 0;
+                --     -- Increment color_index
+                --     if color_index < 7 then
+                --         color_index <= color_index + 1;
+                --     else
+                --         color_index <= 0;
+                --     end if;
+                -- end if;
+                
+                -- Update color_index
+                if H_CNT = (SEGMENT_WIDTH * (color_index + 1) - 1) then
+                    if color_index < 7 then
+                        color_index <= color_index + 1;
+                    else
+                        color_index <= 0;
+                    end if;
+                end if;
 
             else
             -- the pixel is not in the visible area -> blank
-                data_ena_sig <= '0';     
+                DATA_DE <= '0';     
                 R_DATA <= (others => '0');
                 G_DATA <= (others => '0');
                 B_DATA <= (others => '0');
             end if;
 
-        DATA_DE <= data_ena_sig;
+        -- DATA_DE <= data_ena_sig;
 
         end if;
     end process;
