@@ -150,13 +150,25 @@ begin
     process
     begin
         wait for 10 us;
-        -- key_rotate_sig <= not key_rotate_sig; -- Press button
-        -- wait for C_CLK_PRD;
-        -- key_rotate_sig <= not key_rotate_sig; -- Release button
+        key_rotate_sig <= not key_rotate_sig; -- Press button
+        -- sw_image_ena_sig <= not sw_image_ena_sig;
+        wait for C_CLK_PRD;
+        key_rotate_sig <= not key_rotate_sig; -- Release button
+        -- sw_image_ena_sig <= not sw_image_ena_sig;
 
-        
     end process;
 
+    -- process
+    -- begin
+    --     wait for 10 us;
+    --     sw_image_ena_sig <= not sw_image_ena_sig;
+    --     -- key_rotate_sig <= not key_rotate_sig; -- Press button
+    --     -- sw_image_ena_sig <= not sw_image_ena_sig;
+    --     wait for 160 * C_CLK_PRD;
+    --     -- -- key_rotate_sig <= not key_rotate_sig; -- Release button
+    --     sw_image_ena_sig <= not sw_image_ena_sig;
+
+    -- end process;
  
     clk_sig <= not clk_sig after C_CLK_PRD / 2;     -- clk_sig toggles every C_CLK_PRD/2 ns
 
