@@ -84,26 +84,27 @@ begin
                 -- image from the memory is displayed 
                 if last_image_ena = '1' then
                     -- draw the image in the center of the screen- Apply the starting coordinates offset
-                    if ((H_CNT >= IMAGE_H_START) and (H_CNT <= IMAGE_H_END))
+                    if ((H_CNT >= IMAGE_H_START - 1) and (H_CNT <= IMAGE_H_END - 1))
                         and ((V_CNT >= IMAGE_V_START) and (V_CNT <= IMAGE_V_END)) then  -- IMAGE_V_STRAT=0, IMAGE_V_END = 479
                     -- Determine the rotated coordinates based on the selected rotation angle
                         case last_angle is
                             when zero_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned((V_CNT + IMAGE_V_OFFSET) * IMAGE_WIDTH + H_CNT - IMAGE_H_OFFSET, SRAM_A'length));
+                                SRAM_A <= std_logic_vector(to_unsigned((V_CNT + IMAGE_V_OFFSET) * IMAGE_WIDTH + (H_CNT + 1) - IMAGE_H_OFFSET, SRAM_A'length));
 
                             when ninety_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned((H_CNT - IMAGE_H_OFFSET) * IMAGE_WIDTH + (IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET, SRAM_A'length));
+                                SRAM_A <= std_logic_vector(to_unsigned(((H_CNT + 1) - IMAGE_H_OFFSET) * IMAGE_WIDTH + (IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET, SRAM_A'length));
 
                             when hundred_eighty_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET) * IMAGE_WIDTH + ((IMAGE_WIDTH - 1) - H_CNT + IMAGE_H_OFFSET), SRAM_A'length));
+                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET) * IMAGE_WIDTH + ((IMAGE_WIDTH - 1) - (H_CNT + 1) + IMAGE_H_OFFSET), SRAM_A'length));
                                                                 
                             when two_hunderd_seventy_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_WIDTH - 1) - H_CNT + IMAGE_H_OFFSET) * IMAGE_WIDTH - (V_CNT + IMAGE_V_OFFSET), SRAM_A'length));
-                                
+                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_WIDTH - 1) - (H_CNT + 1) + IMAGE_H_OFFSET) * IMAGE_WIDTH - (V_CNT + IMAGE_V_OFFSET), SRAM_A'length));
+                -- NOTE: I wrote (H_CNT + 1) instead of H_CNT in order to get the address and data from the sram 1 pixel earlier
+                --       than the last imlepentation in git history 
                         end case;
                         
                         R_DATA <= convert_to_eight_bit(to_integer(unsigned(SRAM_D(4 downto 0))), 5);
