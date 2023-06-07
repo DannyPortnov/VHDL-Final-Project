@@ -147,14 +147,14 @@ begin
         HEX3  => open
     );
 
-    hdmi_sim: entity work.hdmi_gen
-    port map (
-        HDMI_TX     =>  hdmi_tx_sig,
-        HDMI_TX_VS  =>  hdmi_vs_sig,
-        HDMI_TX_HS  =>  hdmi_hs_sig,
-        HDMI_TX_DE  =>  hdmi_de_sig,
-        HDMI_TX_CLK =>  hdmi_clk_sig
-    );
+    -- hdmi_sim: entity work.hdmi_gen
+    -- port map (
+    --     HDMI_TX     =>  hdmi_tx_sig,
+    --     HDMI_TX_VS  =>  hdmi_vs_sig,
+    --     HDMI_TX_HS  =>  hdmi_hs_sig,
+    --     HDMI_TX_DE  =>  hdmi_de_sig,
+    --     HDMI_TX_CLK =>  hdmi_clk_sig
+    -- );
 
     sram_inst: entity work.sim_sram
     generic map (
@@ -171,35 +171,35 @@ begin
     );
     
 
-    process
-    begin
-        if perform_setup then
-            wait for 10 us;
-            perform_setup <= false;
-            file_open(output_file, "output.txt", write_mode);
-            key_rotate_sig <= not key_rotate_sig; -- Press button
-            -- sw_image_ena_sig <= not sw_image_ena_sig;
-            wait for C_CLK_PRD;
-            key_rotate_sig <= not key_rotate_sig; -- Release button
-        end if;
+    -- process
+    -- begin
+    --     if perform_setup then
+    --         wait for 10 us;
+    --         perform_setup <= false;
+    --         file_open(output_file, "output.txt", write_mode);
+    --         key_rotate_sig <= not key_rotate_sig; -- Press button
+    --         -- sw_image_ena_sig <= not sw_image_ena_sig;
+    --         wait for C_CLK_PRD;
+    --         key_rotate_sig <= not key_rotate_sig; -- Release button
+    --     end if;
 
-        for i in hdmi_tx_sig'range loop
-            -- if hdmi_tx_sig(i) = '1' then
-            --     write(output_file, integer'image(1));
-            -- else
-            --     write(output_file, integer'image(0));
-            -- end if;
-        end loop;
-    end process;
+    --     for i in hdmi_tx_sig'range loop
+    --         -- if hdmi_tx_sig(i) = '1' then
+    --         --     write(output_file, integer'image(1));
+    --         -- else
+    --         --     write(output_file, integer'image(0));
+    --         -- end if;
+    --     end loop;
+    -- end process;
 
-    process( hdmi_vs_sig )
-    begin
-        if hdmi_vs_sig = '0' then
-            file_close(output_file);
-            report "Finished";
-            finish;
-        end if;
-    end process ; 
+    -- process( hdmi_vs_sig )
+    -- begin
+    --     if hdmi_vs_sig = '0' then
+    --         file_close(output_file);
+    --         report "Finished";
+    --         finish;
+    --     end if;
+    -- end process ; 
  
     clk_sig <= not clk_sig after C_CLK_PRD / 2;     -- clk_sig toggles every C_CLK_PRD/2 ns
 
