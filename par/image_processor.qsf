@@ -267,6 +267,7 @@ set_instance_assignment -name IO_STANDARD "1.2 V" -to SW_MODE
 
 set_global_assignment -name TIMING_ANALYZER_MULTICORNER_ANALYSIS ON
 set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
+set_global_assignment -name VHDL_FILE ../src/clock_generator/clock_generator.vhd
 set_global_assignment -name VHDL_FILE ../src/timing_generator.vhd
 set_global_assignment -name VHDL_FILE ../src/push_button_if.vhd
 set_global_assignment -name VHDL_FILE ../src/image_processor_pack.vhd
@@ -274,5 +275,6 @@ set_global_assignment -name VHDL_FILE ../src/image_processor.vhd
 set_global_assignment -name VHDL_FILE ../src/data_generator.vhd
 set_global_assignment -name VHDL_FILE ../src/controller.vhd
 set_global_assignment -name VHDL_FILE ../src/bcd_to_7seg.vhd
-set_global_assignment -name VHDL_FILE ../src/clock_generator/clock_generator.vhd
+set_global_assignment -name QIP_FILE ../src/clock_generator.qip
+set_global_assignment -name SIP_FILE ../src/clock_generator.sip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
