@@ -155,6 +155,20 @@ begin
         HDMI_TX_DE  =>  hdmi_de_sig,
         HDMI_TX_CLK =>  hdmi_clk_sig
     );
+
+    sram_inst: entity work.sim_sram
+    generic map (
+        ini_file_name => "mem.bin"
+    )
+    port map (
+        SRAM_ADDR       => sram_a_sig,
+        SRAM_DQ         => sram_d_sig,
+        SRAM_WE_N       => sram_wen_sig,
+        SRAM_OE_N       => sram_oen_sig,
+        SRAM_UB_N       => sram_ubn_sig,
+        SRAM_LB_N       => sram_lbn_sig,
+        SRAM_CE_N       => sram_cen_sig
+    );
     
 
     process
@@ -169,18 +183,18 @@ begin
             key_rotate_sig <= not key_rotate_sig; -- Release button
         end if;
 
-        for i in hdmi_sig'range loop
-            if hdmi_sig(i) = '1' then
-                write(output_file, integer'image(1));
-            else
-                write(output_file, integer'image(0));
-            end if;
+        for i in hdmi_tx_sig'range loop
+            -- if hdmi_tx_sig(i) = '1' then
+            --     write(output_file, integer'image(1));
+            -- else
+            --     write(output_file, integer'image(0));
+            -- end if;
         end loop;
     end process;
 
-    process( vs_sig )
+    process( hdmi_vs_sig )
     begin
-        if vs_sig = '0' then
+        if hdmi_vs_sig = '0' then
             file_close(output_file);
             report "Finished";
             finish;
