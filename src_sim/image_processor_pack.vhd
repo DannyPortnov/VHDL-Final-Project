@@ -38,9 +38,8 @@ package image_processor_pack is
     -- function that converts color from L<=8 bit to 8 bit representation
     -- To Niv: the type of a function’s arguments and return value
     -- must be specified using a type mark (std_logic_vector), not a subtype indication (std_logic_vector(7 downto 0)). 
-    -- function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM;
-    --                                bits_num   : integer range 0 to G_BITS_NUM) return std_logic_vector;
-    function color_convert (P_in: std_logic_vector) return std_logic_vector;
+    function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM;
+                                   bits_num   : integer range 0 to G_BITS_NUM) return std_logic_vector;
                                    
     -- function that converts BCD to 7 segment representation
     function bcd_to_7seg (BCD_IN: integer range 0 to 9) return std_logic_vector;
@@ -53,34 +52,26 @@ end package;
 
 package body image_processor_pack is   
     
-    -- -- function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM)    return std_logic_vector is
-    -- function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM;
-    --                                bits_num   : integer range 0 to G_BITS_NUM) return std_logic_vector is    
-    --     variable color_conv : std_logic_vector(7 downto 0);
-
-    -- begin
-    --     -- To Niv: variables are assigned values using the variable assignment operator :=, not the signal assignment operator <=.
-    --     color_conv := std_logic_vector(to_unsigned(integer(floor(real(color_data)*(real(MAX_BITS)/real((2**bits_num - 1))))) , color_conv'length)); 
-    --     -- if (color_data < R_B_PIXELS_NUM) and (color_data >= 0) then
-    --     --     color_conv := std_logic_vector(to_unsigned(integer(floor(real(color_data)*(real(255)/real(R_B_CONV_PARAM)))) , color_conv'length)); 
-        
-    --     -- elsif (color_data >= R_B_PIXELS_NUM) and (color_data < G_PIXELS_NUM) then
-    --     --     color_conv := std_logic_vector(to_unsigned(color_data * integer(floor(real(255)/real(G_CONV_PARAM))) , color_conv'length)); 
-    --     -- end if;
-    --     return (color_conv);
-    -- end convert_to_eight_bit;
-    
-    function color_convert (P_in: std_logic_vector) return std_logic_vector is
-        constant P_in_to_int : integer range 0 to G_PIXELS_NUM := to_integer(unsigned(P_in));
-        constant P_in_length : integer range 0 to P_in'length := P_in'length;
+    -- function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM)    return std_logic_vector is
+    function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM;
+                                   bits_num   : integer range 0 to G_BITS_NUM) return std_logic_vector is    
         variable color_conv : std_logic_vector(7 downto 0);
-        
-    begin
-        -- P_in_to_int := to_integer(unsigned(P_in));
-        color_conv := std_logic_vector(to_unsigned(integer(floor(real(P_in_to_int)*(real(MAX_BITS)/real((2**(P_in_length) - 1))))) , color_conv'length)); 
-      
 
-    end color_convert;
+    begin
+        -- To Niv: variables are assigned values using the variable assignment operator :=, not the signal assignment operator <=.
+        color_conv := std_logic_vector(to_unsigned(integer(floor(real(color_data)*(real(MAX_BITS)/real((2**bits_num - 1))))) , color_conv'length)); 
+        -- if (color_data < R_B_PIXELS_NUM) and (color_data >= 0) then
+        --     color_conv := std_logic_vector(to_unsigned(integer(floor(real(color_data)*(real(255)/real(R_B_CONV_PARAM)))) , color_conv'length)); 
+        
+        -- elsif (color_data >= R_B_PIXELS_NUM) and (color_data < G_PIXELS_NUM) then
+        --     color_conv := std_logic_vector(to_unsigned(color_data * integer(floor(real(255)/real(G_CONV_PARAM))) , color_conv'length)); 
+        -- end if;
+        return (color_conv);
+    end convert_to_eight_bit;
+    
+
+
+
 
 
     function bcd_to_7seg (BCD_IN: integer range 0 to 9) return std_logic_vector is

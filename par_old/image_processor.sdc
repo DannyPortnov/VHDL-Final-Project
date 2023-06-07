@@ -1,4 +1,4 @@
-## Generated SDC file "stat_calc.sdc"
+## Generated SDC file "light_organ.sdc"
 
 ## Copyright (C) 2020  Intel Corporation. All rights reserved.
 ## Your use of Intel Corporation's design tools, logic functions 
@@ -20,7 +20,7 @@
 ## PROGRAM "Quartus Prime"
 ## VERSION "Version 20.1.1 Build 720 11/11/2020 SJ Lite Edition"
 
-## DATE    "Sat Nov 27 19:46:59 2021"
+## DATE    "Tue Nov 01 21:08:58 2022"
 
 ##
 ## DEVICE  "5CGXFC5C6F27C7"
@@ -40,7 +40,7 @@ set_time_format -unit ns -decimal_places 3
 #**************************************************************
 
 create_clock -name {CLK} -period 20.000 -waveform { 0.000 10.000 } [get_ports {CLK}]
-derive_pll_clocks -create_base_clocks
+
 
 #**************************************************************
 # Create Generated Clock
