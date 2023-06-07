@@ -37,8 +37,6 @@ package image_processor_pack is
     --constant C_VAL_1SEC : integer := 25000000;
 
     -- function that converts color from L<=8 bit to 8 bit representation
-    -- To Niv: the type of a function’s arguments and return value
-    -- must be specified using a type mark (std_logic_vector), not a subtype indication (std_logic_vector(7 downto 0)). 
     -- function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM;
     --                                bits_num   : integer range 0 to G_BITS_NUM) return std_logic_vector;
     function color_convert (P_in: std_logic_vector) return std_logic_vector;
