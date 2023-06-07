@@ -2,6 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
+use ieee.fixed_pkg.all;
 
 package image_processor_pack is
     constant C_PIXELS_PER_LINE		: integer := 800;
@@ -70,17 +71,43 @@ package body image_processor_pack is
     --     return (color_conv);
     -- end convert_to_eight_bit;
     
-    function color_convert (P_in: std_logic_vector) return std_logic_vector is
+    -- function color_convert (P_in: std_logic_vector) return std_logic_vector is
+    --     constant P_in_to_int : integer range 0 to G_PIXELS_NUM := to_integer(unsigned(P_in));
+    --     constant P_in_length : integer range 0 to P_in'length := P_in'length;
+    --     variable color_conv : std_logic_vector(7 downto 0);
+        
+    -- begin
+    --     -- P_in_to_int := to_integer(unsigned(P_in));
+    --     color_conv := std_logic_vector(to_unsigned(integer(floor(real(P_in_to_int)*(real(MAX_BITS)/real((2**(P_in_length) - 1))))) , color_conv'length)); 
+      
+    --     return (color_conv);
+    -- end color_convert;
+
+    function color_convert(P_in: std_logic_vector) return std_logic_vector is
         constant P_in_to_int : integer range 0 to G_PIXELS_NUM := to_integer(unsigned(P_in));
         constant P_in_length : integer range 0 to P_in'length := P_in'length;
         variable color_conv : std_logic_vector(7 downto 0);
-        
+    
+        -- Define fixed-point parameters
+        constant FRACTIONAL_BITS : integer := 8; -- Number of fractional bits
+        subtype fixed_point_type is integer range -2**(P_in'length-1-FRACTIONAL_BITS) to 2**(P_in'length-1-FRACTIONAL_BITS)-1;
+        constant MAX_BITS : fixed_point_type := 255; -- Maximum value for 8-bit color
+        constant SCALE_FACTOR : fixed_point_type := MAX_BITS / (2**P_in_length - 1);
+        variable fixed_point_val : fixed_point_type;
     begin
-        -- P_in_to_int := to_integer(unsigned(P_in));
-        color_conv := std_logic_vector(to_unsigned(integer(floor(real(P_in_to_int)*(real(MAX_BITS)/real((2**(P_in_length) - 1))))) , color_conv'length)); 
-      
-
+        -- Convert P_in to fixed-point representation
+        fixed_point_val := P_in_to_int;
+    
+        -- Perform fixed-point arithmetic for color conversion
+        fixed_point_val := fixed_point_val * SCALE_FACTOR;
+    
+        -- Convert fixed-point value to integer
+        color_conv := std_logic_vector(to_unsigned(fixed_point_val, color_conv'length));
+    
+        return color_conv;
     end color_convert;
+    
+    
 
 
     function bcd_to_7seg (BCD_IN: integer range 0 to 9) return std_logic_vector is
