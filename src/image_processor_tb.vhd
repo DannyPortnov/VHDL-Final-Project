@@ -1,6 +1,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use WORK.image_processor_pack.all;
+use ieee.numeric_std.all;
+use ieee.std_logic_textio.all;
+use std.textio.all;
+use std.env.finish;
 
 entity image_processor_tb is        -- The Testbench entity is empty. No ports.
 end entity;
@@ -89,9 +93,14 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
     signal sram_wen_sig         : std_logic := '1';
     signal sram_ubn_sig         : std_logic := '0';
     signal sram_lbn_sig         : std_logic := '0';
-
-
+    signal vs_sig               : std_logic;
+    signal hdmi_sig             : std_logic_vector(23 downto 0);
+    file output_file            : text;
+    signal output_line          : std_logic_vector(799 downto 0);
+    signal perform_setup  : boolean := true;
+    
 begin
+    
    
     uut: image_processor                    -- This is the component instantiation. uut is the instance name of the component counter_2_digits
     generic map (
@@ -120,8 +129,8 @@ begin
         SRAM_UBn   => sram_ubn_sig,
         SRAM_LBn  => sram_lbn_sig,
                                      
-        HDMI_TX     => open,
-        HDMI_TX_VS  => open,
+        HDMI_TX     => hdmi_sig,
+        HDMI_TX_VS  => vs_sig,
         HDMI_TX_HS => open,
         HDMI_TX_DE  => open,
         HDMI_TX_CLK  => open,
@@ -132,7 +141,7 @@ begin
         HEX3  => open
     );
 
-
+    
     sram_inst: entity work.sim_sram
     generic map (
         ini_file_name => "mem.bin"
@@ -147,28 +156,38 @@ begin
         SRAM_CE_N       => sram_cen_sig
     );
 
+    
+
     process
     begin
-        wait for 10 us;
-        key_rotate_sig <= not key_rotate_sig; -- Press button
-        -- sw_image_ena_sig <= not sw_image_ena_sig;
-        wait for C_CLK_PRD;
-        key_rotate_sig <= not key_rotate_sig; -- Release button
-        -- sw_image_ena_sig <= not sw_image_ena_sig;
+        if perform_setup then
+            wait for 10 us;
+            perform_setup <= false;
+            file_open(output_file, "output.txt", write_mode);
+            key_rotate_sig <= not key_rotate_sig; -- Press button
+            -- sw_image_ena_sig <= not sw_image_ena_sig;
+            wait for C_CLK_PRD;
+            key_rotate_sig <= not key_rotate_sig; -- Release button
+        end if;
 
+        for i in hdmi_sig'range loop
+            if hdmi_sig(i) = '1' then
+                write(output_file, integer'image(1));
+            else
+                write(output_file, integer'image(0));
+            end if;
+        end loop;
+        
     end process;
 
-    -- process
-    -- begin
-    --     wait for 10 us;
-    --     sw_image_ena_sig <= not sw_image_ena_sig;
-    --     -- key_rotate_sig <= not key_rotate_sig; -- Press button
-    --     -- sw_image_ena_sig <= not sw_image_ena_sig;
-    --     wait for 160 * C_CLK_PRD;
-    --     -- -- key_rotate_sig <= not key_rotate_sig; -- Release button
-    --     sw_image_ena_sig <= not sw_image_ena_sig;
-
-    -- end process;
+    process( vs_sig )
+    begin
+        if vs_sig = '0' then
+            file_close(output_file);
+            report "Finished";
+            finish;
+        end if;
+    end process ; 
  
     clk_sig <= not clk_sig after C_CLK_PRD / 2;     -- clk_sig toggles every C_CLK_PRD/2 ns
 

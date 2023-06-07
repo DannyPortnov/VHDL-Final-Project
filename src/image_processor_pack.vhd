@@ -56,7 +56,7 @@ package body image_processor_pack is
     function convert_to_eight_bit (color_data : integer range 0 to G_PIXELS_NUM;
                                    bits_num   : integer range 0 to G_BITS_NUM) return std_logic_vector is    
         variable color_conv : std_logic_vector(7 downto 0);
-
+        
     begin
         -- To Niv: variables are assigned values using the variable assignment operator :=, not the signal assignment operator <=.
         color_conv := std_logic_vector(to_unsigned(integer(floor(real(color_data)*(real(MAX_BITS)/real((2**bits_num - 1))))) , color_conv'length)); 
