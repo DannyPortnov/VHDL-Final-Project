@@ -70,18 +70,19 @@ package body image_processor_pack is
     -- end convert_to_eight_bit;
     
     function color_convert (P_in: std_logic_vector) return std_logic_vector is
-        -- constant P_in_to_int : integer range 0 to G_PIXELS_NUM := to_integer(unsigned(P_in));
-        -- constant P_in_length : integer range 0 to P_in'length := P_in'length;
-        constant P_in_to_real : real range 0 to real(G_PIXELS_NUM) := real(to_integer(unsigned(P_in)));
+        constant P_in_to_int : integer range 0 to G_PIXELS_NUM := to_integer(unsigned(P_in));
         constant P_in_length : integer range 0 to P_in'length := P_in'length;
-        constant conv_mul    : real range 0 to  real(G_PIXELS_NUM) := real(MAX_BITS)/(2**(P_in_length) - 1);
-        constant color_conv_int : integer range 0 to G_PIXELS_NUM  := integer(floor(conv_mul*P_in_to_real));
+        -- constant P_in_to_real : real range real(0) to real(G_PIXELS_NUM) := real(to_integer(unsigned(P_in)));
+        -- constant P_in_length : integer range 0 to P_in'length := P_in'length;
+        -- constant conv_mul    : real range real(0) to  real(G_PIXELS_NUM) := real(MAX_BITS)/real(2**(P_in_length) - 1);
+        -- constant color_conv_int : integer range 0 to G_PIXELS_NUM  := integer(floor(conv_mul*P_in_to_real));
 
         variable color_conv : std_logic_vector(7 downto 0);
         
     begin
         -- P_in_to_int := to_integer(unsigned(P_in));
-        color_conv := std_logic_vector(to_unsigned(color_conv_int) , color_conv'length); 
+        -- color_conv := std_logic_vector(to_unsigned(color_conv_int) , color_conv'length); 
+        color_conv := std_logic_vector(to_unsigned((P_in_to_int*(MAX_BITS/(2**(P_in_length) - 1))), color_conv'length)); 
       
         return (color_conv);
     end color_convert;
