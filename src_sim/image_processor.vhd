@@ -146,6 +146,15 @@ architecture behave of image_processor is
 	);
     end component;
 
+    -- component hdmi_gen is                -- This is the component declaration.
+    -- port (
+    --     HDMI_TX    : in std_logic_vector(23 downto 0);
+    --     HDMI_TX_VS : in std_logic;
+    --     HDMI_TX_HS : in std_logic;
+    --     HDMI_TX_DE : in std_logic;
+    --     HDMI_TX_CLK: in std_logic
+	-- );
+    -- end component;
 
      -- clock generator signals --
     signal outclk_0_to_clk : std_logic;
