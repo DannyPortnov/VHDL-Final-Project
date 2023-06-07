@@ -36,6 +36,17 @@ architecture behave of timing_generator is
 
 
     begin
+
+
+    -- **************************************************************************
+    -- ***********************  CHANGE IN TIMING GENERATOR  *********************
+    -- ****** H_CNT and V_CNT now count only in the range the visible area ******
+    -- ****** If they exceed the visible area, their value will be constant *****
+    -- **************************************************************************
+    -- **************************************************************************
+
+
+
     process(CLK,RST)
     begin
         if RST = G_RESET_ACTIVE_VALUE then   --reset output 
@@ -101,8 +112,11 @@ architecture behave of timing_generator is
     --*********************************************************************************************************
         end if;
     end process;
-    H_CNT <= h_cnt_sig;
+    H_CNT <= (h_cnt_sig - HS_pulse - H_BP) when (h_cnt_sig >= (HS_pulse + H_BP) and h_cnt_sig <=(C_PIXELS_PER_LINE - H_FP - 1))
+                                           else  C_PIXELS_PER_LINE - 1;
     V_CNT <= v_cnt_sig;
+    -- V_CNT <= v_cnt_sig when (h_cnt_sig >= (HS_pulse + H_BP) and h_cnt_sig <=(C_PIXELS_PER_LINE - H_FP - 1))
+    --                    else C_PIXELS_PER_FRAME - 1;
 end architecture;
 
 
