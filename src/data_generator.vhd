@@ -78,15 +78,17 @@ begin
         if RST = G_RESET_ACTIVE_VALUE then    
             -- color_counter <= 0;
             color_index <= 0;
-            data_ena_sig <= '0';
+            -- data_ena_sig <= '0';
+            DATA_DE <= '0';
         
         elsif rising_edge(CLK) then
             
             -- Check if the pixel is within the visible area
             if (H_CNT < VISIBLE_PIXELS_PER_LINE) and (V_CNT < VISIBLE_PIXELS_PER_FRAME) then
                 -- the pixel is inside the visible area
-                data_ena_sig <= '1';
-                DATA_DE <= data_ena_sig;
+                -- data_ena_sig <= '1';
+                -- DATA_DE <= data_ena_sig;
+                DATA_DE <= '1';
                 -- image from the memory is displayed 
                 if last_image_ena = '1' then
                     -- draw the image in the center of the screen- Apply the starting coordinates offset
@@ -96,19 +98,19 @@ begin
                         case last_angle is
                             when zero_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned((V_CNT + IMAGE_V_OFFSET) * IMAGE_WIDTH + (H_CNT + 2) - IMAGE_H_OFFSET, SRAM_A'length));
+                                SRAM_A <= std_logic_vector(to_unsigned((V_CNT + IMAGE_V_OFFSET) * IMAGE_WIDTH + (H_CNT + 3) - IMAGE_H_OFFSET, SRAM_A'length));
 
                             when ninety_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned(((H_CNT + 2) - IMAGE_H_OFFSET) * IMAGE_WIDTH + (IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET, SRAM_A'length));
+                                SRAM_A <= std_logic_vector(to_unsigned(((H_CNT + 3) - IMAGE_H_OFFSET) * IMAGE_WIDTH + (IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET, SRAM_A'length));
 
                             when hundred_eighty_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET) * IMAGE_WIDTH + ((IMAGE_WIDTH - 1) - (H_CNT + 2) + IMAGE_H_OFFSET), SRAM_A'length));
+                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_HEIGHT - 1) - V_CNT - IMAGE_V_OFFSET) * IMAGE_WIDTH + ((IMAGE_WIDTH - 1) - (H_CNT + 3) + IMAGE_H_OFFSET), SRAM_A'length));
                                                                 
                             when two_hunderd_seventy_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_WIDTH - 1) - (H_CNT + 2) + IMAGE_H_OFFSET) * IMAGE_WIDTH - (V_CNT + IMAGE_V_OFFSET), SRAM_A'length));
+                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_WIDTH - 1) - (H_CNT + 3) + IMAGE_H_OFFSET) * IMAGE_WIDTH - (V_CNT + IMAGE_V_OFFSET), SRAM_A'length));
                 -- NOTE: I wrote (H_CNT + 1) instead of H_CNT in order to get the address and data from the sram 1 pixel earlier
                 --       than the last imlepentation in git history 
                         end case;
