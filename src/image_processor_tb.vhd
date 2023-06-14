@@ -171,10 +171,10 @@ begin
     );
     
 
-    -- process
-    -- begin
-    --     if perform_setup then
-    --         wait for 10 us;
+    process
+    begin
+        -- if perform_setup then
+        wait for 10 us;
     --         perform_setup <= false;
     --         file_open(output_file, "output.txt", write_mode);
     --         key_rotate_sig <= not key_rotate_sig; -- Press button
@@ -190,7 +190,7 @@ begin
     --         --     write(output_file, integer'image(0));
     --         -- end if;
     --     end loop;
-    -- end process;
+    end process;
 
     -- process( hdmi_vs_sig )
     -- begin

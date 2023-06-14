@@ -28,4 +28,4 @@ add wave -group image_processor image_processor_tb/uut/*
 config wave -signalnamewidth 1
 --restart -f
 
-run 16ms
+run 50ms
