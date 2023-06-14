@@ -125,9 +125,9 @@ begin
                     else
                         -- data_ena_sig <= '0';
                         -- DATA_DE <= data_ena_sig;
-                        -- R_DATA <= (others => '0');
-                        -- G_DATA <= (others => '0');
-                        -- B_DATA <= (others => '0');
+                        R_DATA <= (others => '0');
+                        G_DATA <= (others => '0');
+                        B_DATA <= (others => '0');
                     end if;
                     
                         
