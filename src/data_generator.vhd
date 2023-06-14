@@ -123,8 +123,8 @@ begin
 
                     -- draw a black pixel if we exceed the image coordinates
                     else
-                        data_ena_sig <= '0';
-                        DATA_DE <= data_ena_sig;
+                        -- data_ena_sig <= '0';
+                        -- DATA_DE <= data_ena_sig;
                         R_DATA <= (others => '0');
                         G_DATA <= (others => '0');
                         B_DATA <= (others => '0');
