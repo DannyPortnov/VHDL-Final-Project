@@ -61,16 +61,26 @@ architecture behave of data_generator is
 begin
 
     -- angle is updated only when we FINISH creating the image
-    last_angle <= ANGLE when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
+    -- last_angle <= ANGLE when ((H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1));
     -- Image Enable is updated only when we FINISH creating the image
-    last_image_ena <= IMAGE_ENA when ((H_CNT = 0) and (V_CNT = 0));
+    -- last_image_ena <= IMAGE_ENA when ((H_CNT = 0) and (V_CNT = 0));
     
     -- **************************************************************************
     -- ***********************  CHANGE IN TIMING GENERATOR  *********************
     -- ****** H_CNT and V_CNT now count only in the range the visible area ******
     -- **************************************************************************
     -- **************************************************************************
-
+    process( CLK )
+    begin
+        if rising_edge(CLK) then
+            if (H_CNT = C_PIXELS_PER_LINE-1) and (V_CNT = C_PIXELS_PER_FRAME-1) then
+                last_angle <= ANGLE;
+            end if;
+            if (H_CNT = 0) and (V_CNT = 0) then
+                last_image_ena <= IMAGE_ENA;
+            end if;
+        end if;
+    end process; 
 
     process(CLK,RST)
     begin
