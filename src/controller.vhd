@@ -108,8 +108,8 @@ begin
                     when 1 =>
                         HEX1 <= tens_bcd_of_90_out;
                     when 2 =>
-                        HEX1 <= hundreds_bcd_of_180_out;
-                        HEX2 <= tens_bcd_of_180_out;
+                        HEX1 <= tens_bcd_of_180_out;
+                        HEX2 <= hundreds_bcd_of_180_out;
                     when others => -- 3 (270)
                         HEX1 <= tens_bcd_of_270_out;
                         HEX2 <= hundreds_bcd_of_270_out;
