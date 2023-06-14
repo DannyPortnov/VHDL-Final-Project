@@ -120,7 +120,7 @@ begin
                                                                 
                             when two_hunderd_seventy_deg =>
                                 -- Access the corresponding pixel from SRAM using the rotated coordinates
-                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_WIDTH - 1) - (H_CNT + 3) + IMAGE_H_OFFSET) * IMAGE_WIDTH - (V_CNT + IMAGE_V_OFFSET), SRAM_A'length));
+                                SRAM_A <= std_logic_vector(to_unsigned(((IMAGE_WIDTH - 1) - (H_CNT + 2) + IMAGE_H_OFFSET) * IMAGE_WIDTH - (V_CNT + IMAGE_V_OFFSET), SRAM_A'length));
                 -- NOTE: I wrote (H_CNT + 1) instead of H_CNT in order to get the address and data from the sram 1 pixel earlier
                 --       than the last imlepentation in git history 
                         end case;
