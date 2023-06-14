@@ -8,10 +8,10 @@ vcom ../src/bcd_to_7seg.vhd
 vcom ../src/controller.vhd 
 vcom ../src/timing_generator.vhd 
 vcom ../src/data_generator.vhd 
-vcom ../src/clock_generator.vhd
+vcom ../src_sim/clock_generator.vhd
 vcom ../src/sim_sram.vhd  
 vcom ../src/push_button_if.vhd 
-vcom ../src/hdmi_gen.vhd 
+-- vcom ../src/hdmi_gen.vhd 
 vcom ../src/image_processor.vhd 
 vcom ../src/image_processor_tb.vhd 
 
