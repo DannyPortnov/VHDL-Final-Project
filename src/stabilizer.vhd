@@ -20,8 +20,8 @@ begin
 	
 	begin
 		if RST = '0' then
-			D2_Q1 <= '0';
-			Q_OUT <= '0';
+			D2_Q1 <= '1';
+			Q_OUT <= '1';
 		elsif rising_edge(CLK) then 
 			Q_OUT <= D2_Q1;
 			D2_Q1 <= D_IN;
