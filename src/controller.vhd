@@ -84,7 +84,7 @@ begin
             end if;
 
             if rotate_sig = '1' then
-                if ROTATION_DIR = '0' then
+                if ROTATION_DIR = '1' then
                     if angle_sig = 3 then
                         angle_sig <= 0;
                     else
