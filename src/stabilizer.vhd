@@ -2,6 +2,12 @@ library ieee;
 use ieee.std_logic_1164.all;
 entity stabilizer is
 
+generic (
+	G_RESET_ACTIVE_VALUE    : std_logic := '0' -- ; -- Determines the RST input polarity. 
+												-- 0 – the RST input is active low 
+												-- 1 – the RST input is active high
+	-- G_INITIAL_STATE : std_logic := '0' -- Determines the initial state of the input.
+);
 port ( 
 	
 	D_IN        : in  std_logic;
