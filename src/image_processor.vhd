@@ -325,6 +325,12 @@ architecture behave of image_processor is
         );
 
 
+        -- SRAM_CEn  <= '0';
+        -- SRAM_OEn  <= '0';
+        -- SRAM_WEn  <= '1';
+        -- SRAM_UBn  <= '0';
+        -- SRAM_LBn  <= '0'; 
+
         HDMI_TX <= r_data_sig & g_data_sig & b_data_sig;
         HDMI_TX_CLK <= outclk_0_to_clk;
 
