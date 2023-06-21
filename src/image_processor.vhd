@@ -146,6 +146,21 @@ architecture behave of image_processor is
 	);
     end component;
 
+    component stabilizer is
+    port ( 
+        D_IN        : in  std_logic;
+        CLK         : in  std_logic; 
+        RST         : in  std_logic;
+        Q_OUT       : out std_logic
+    );
+    end component;
+    
+     -- stabilizer signals --
+    signal key_rotate_to_sw_in : std_logic;
+    signal rotation_to_rotate_dir : std_logic;
+    signal ena_to_image_ena : std_logic;
+    signal sw_mode_to_mode : std_logic;
+    signal RSTn_to_RST : std_logic;
 
      -- clock generator signals --
     signal outclk_0_to_clk : std_logic;
@@ -161,7 +176,7 @@ architecture behave of image_processor is
     signal timing_vs_to_controller_vs : std_logic;
     signal timing_h_cnt_to_data_h_cnt : integer range 0 to C_PIXELS_PER_LINE-1;
     signal timing_v_cnt_to_data_v_cnt : integer range 0 to C_PIXELS_PER_FRAME-1;
-
+    
     -- Data generator signals --
     signal r_data_sig : std_logic_vector(7 downto 0);
     signal g_data_sig : std_logic_vector(7 downto 0);
@@ -170,100 +185,133 @@ architecture behave of image_processor is
     
     signal rst_sig : std_logic;
     signal RST : std_logic;
+    
+    begin
+        
+        rst_sig <= locked_to_rst_sig and RSTn;
+        RST <= not RSTn;
 
-begin
+        enable_stabilizer: stabilizer
+        port map (
+            D_IN        => SW_IMAGE_ENA,
+            CLK         => outclk_0_to_clk,
+            RST         => rst_sig,
+            Q_OUT       => ena_to_image_ena
+        );
 
-    rst_sig <= locked_to_rst_sig and RSTn;
-    RST <= not RSTn;
+        direction_stabilizer: stabilizer
+        port map (
+            D_IN        => SW_ROTATION_DIR,
+            CLK         => outclk_0_to_clk,
+            RST         => rst_sig,
+            Q_OUT       => rotation_to_rotate_dir
+        );
 
-    clock: clock_generator            
-    port map (
-		refclk   => CLK,
-		rst      => RST,
-		outclk_0 => outclk_0_to_clk,
-		locked   => locked_to_rst_sig
-	);
+        rotation_stabilizer: stabilizer
+        port map (
+            D_IN        => KEY_ROTATE,
+            CLK         => outclk_0_to_clk,
+            RST         => rst_sig,
+            Q_OUT       => key_rotate_to_sw_in
+        );
 
-    push_button: push_button_if  
-    generic map (
-        G_RESET_ACTIVE_VALUE    => C_RESET_ACTIVE_VALUE, 
-        G_BUTTON_NORMAL_STATE   => C_BUTTON_NORMAL_STATE, 
-        G_PRESS_TIMOUT_VAL      => C_PRESS_TIMOUT_VAL, 
-        G_TIME_BETWEEN_PULSES   => C_TIME_BETWEEN_PULSES
-    )
-    port map ( 
-        RST         => rst_sig,    
-        CLK         => outclk_0_to_clk,     
-        SW_IN       => KEY_ROTATE,    
-        PRESS_OUT   => press_out_to_rotate  
-    );
+        rst_stabilizer: stabilizer
+        port map (
+            D_IN        => RST,
+            CLK         => outclk_0_to_clk,
+            RST         => rst_sig,
+            Q_OUT       => RSTn_to_RST
+        );
 
-    timing: timing_generator  
-    generic map (
-        G_RESET_ACTIVE_VALUE      => C_RESET_ACTIVE_VALUE
-    )
-    port map (
-        CLK         => outclk_0_to_clk,
-        RST         => rst_sig,
-        H_CNT       => timing_h_cnt_to_data_h_cnt,
-        V_CNT       => timing_v_cnt_to_data_v_cnt,
-        H_SYNC      => HDMI_TX_HS,
-        V_SYNC      => HDMI_TX_VS,
-        VS          => timing_vs_to_controller_vs
-    );
-
-    data: data_generator            
-    generic map (
-        G_RESET_ACTIVE_VALUE        => C_RESET_ACTIVE_VALUE
-    )
-    port map (
-        CLK            => outclk_0_to_clk,
-        RST            => rst_sig,
-        ANGLE          => control_angle_to_data_angle,
-        IMAGE_ENA      => SW_IMAGE_ENA,
-        H_CNT          => timing_h_cnt_to_data_h_cnt,
-        V_CNT          => timing_v_cnt_to_data_v_cnt,
-        SRAM_D         => SRAM_D,
-        SRAM_A         => SRAM_A,
-        R_DATA         => r_data_sig,
-        G_DATA         => g_data_sig,
-        B_DATA         => b_data_sig,
-        DATA_DE        => HDMI_TX_DE
-    );
-   
-    -- hdmi: hdmi_gen            
-
-    -- port map (
-    --     HDMI_TX     =>  HDMI_TX,
-    --     HDMI_TX_VS  =>  HDMI_TX_VS,
-    --     HDMI_TX_HS  =>  HDMI_TX_HS,
-    --     HDMI_TX_DE  =>  HDMI_TX_DE,
-    --     HDMI_TX_CLK =>  HDMI_TX_CLK
-    -- );
+        mode_stabilizer: stabilizer
+        port map (
+            D_IN        => SW_MODE,
+            CLK         => outclk_0_to_clk,
+            RST         => rst_sig,
+            Q_OUT       => sw_mode_to_mode
+        );
 
 
 
-    ctrl: controller  
-    generic map (
-        G_RESET_ACTIVE_VALUE    => C_RESET_ACTIVE_VALUE,
-        G_VAL_1SEC              => G_VAL_1SEC
-    )
-    port map ( 
-        RST             => rst_sig,
-        CLK             => outclk_0_to_clk,
-        ROTATE          => press_out_to_rotate,
-        ROTATION_DIR    => SW_ROTATION_DIR,                       
-        VS              => timing_vs_to_controller_vs,                            
-        MODE            => SW_MODE,
-        ANGLE           => control_angle_to_data_angle,
-                                                    
-        HEX0            => HEX0, -- The ones digit of the image angle
-        HEX1            => HEX1, -- The tens digit of the image angle
-        HEX2            => HEX2, -- The hundreds digit of the image angle
-        HEX3            => HEX3  -- Should be OFF
-    );
 
-    HDMI_TX <= r_data_sig & g_data_sig & b_data_sig;
-    HDMI_TX_CLK <= outclk_0_to_clk;
+        clock: clock_generator            
+        port map (
+            refclk   => CLK,
+            rst      => RSTn_to_RST,
+            outclk_0 => outclk_0_to_clk,
+            locked   => locked_to_rst_sig
+        );
+
+        push_button: push_button_if  
+        generic map (
+            G_RESET_ACTIVE_VALUE    => C_RESET_ACTIVE_VALUE, 
+            G_BUTTON_NORMAL_STATE   => C_BUTTON_NORMAL_STATE, 
+            G_PRESS_TIMOUT_VAL      => C_PRESS_TIMOUT_VAL, 
+            G_TIME_BETWEEN_PULSES   => C_TIME_BETWEEN_PULSES
+        )
+        port map ( 
+            RST         => rst_sig,    
+            CLK         => outclk_0_to_clk,     
+            SW_IN       => key_rotate_to_sw_in,    
+            PRESS_OUT   => press_out_to_rotate  
+        );
+
+        timing: timing_generator  
+        generic map (
+            G_RESET_ACTIVE_VALUE      => C_RESET_ACTIVE_VALUE
+        )
+        port map (
+            CLK         => outclk_0_to_clk,
+            RST         => rst_sig,
+            H_CNT       => timing_h_cnt_to_data_h_cnt,
+            V_CNT       => timing_v_cnt_to_data_v_cnt,
+            H_SYNC      => HDMI_TX_HS,
+            V_SYNC      => HDMI_TX_VS,
+            VS          => timing_vs_to_controller_vs
+        );
+
+        data: data_generator            
+        generic map (
+            G_RESET_ACTIVE_VALUE        => C_RESET_ACTIVE_VALUE
+        )
+        port map (
+            CLK            => outclk_0_to_clk,
+            RST            => rst_sig,
+            ANGLE          => control_angle_to_data_angle,
+            IMAGE_ENA      => ena_to_image_ena,
+            H_CNT          => timing_h_cnt_to_data_h_cnt,
+            V_CNT          => timing_v_cnt_to_data_v_cnt,
+            SRAM_D         => SRAM_D,
+            SRAM_A         => SRAM_A,
+            R_DATA         => r_data_sig,
+            G_DATA         => g_data_sig,
+            B_DATA         => b_data_sig,
+            DATA_DE        => HDMI_TX_DE
+        );
+
+
+        ctrl: controller  
+        generic map (
+            G_RESET_ACTIVE_VALUE    => C_RESET_ACTIVE_VALUE,
+            G_VAL_1SEC              => G_VAL_1SEC
+        )
+        port map ( 
+            RST             => rst_sig,
+            CLK             => outclk_0_to_clk,
+            ROTATE          => press_out_to_rotate,
+            ROTATION_DIR    => rotation_to_rotate_dir,                       
+            VS              => timing_vs_to_controller_vs,                            
+            MODE            => sw_mode_to_mode,
+            ANGLE           => control_angle_to_data_angle,
+                                                        
+            HEX0            => HEX0, -- The ones digit of the image angle
+            HEX1            => HEX1, -- The tens digit of the image angle
+            HEX2            => HEX2, -- The hundreds digit of the image angle
+            HEX3            => HEX3  -- Should be OFF
+        );
+
+
+        HDMI_TX <= r_data_sig & g_data_sig & b_data_sig;
+        HDMI_TX_CLK <= outclk_0_to_clk;
 
 end architecture;
