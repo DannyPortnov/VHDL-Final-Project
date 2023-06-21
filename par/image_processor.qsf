@@ -267,6 +267,7 @@ set_instance_assignment -name IO_STANDARD "1.2 V" -to SW_MODE
 
 set_global_assignment -name TIMING_ANALYZER_MULTICORNER_ANALYSIS ON
 set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
+set_global_assignment -name VHDL_FILE ../src/stabilizer.vhd
 set_global_assignment -name VHDL_FILE ../src/clock_generator/clock_generator.vhd
 set_global_assignment -name VHDL_FILE ../src/timing_generator.vhd
 set_global_assignment -name VHDL_FILE ../src/push_button_if.vhd

@@ -164,6 +164,7 @@ architecture behave of image_processor is
     signal rotation_to_rotate_dir : std_logic;
     signal ena_to_image_ena : std_logic;
     signal sw_mode_to_mode : std_logic;
+    -- signal RSTn_to_RST : std_logic;
 
      -- clock generator signals --
     signal outclk_0_to_clk : std_logic;
@@ -227,6 +228,14 @@ architecture behave of image_processor is
             RST         => RSTn,
             Q_OUT       => key_rotate_to_sw_in
         );
+
+        -- rst_stabilizer: stabilizer
+        -- port map (
+        --     D_IN        => RST,
+        --     CLK         => outclk_0_to_clk,
+        --     RST         => rst_sig,
+        --     Q_OUT       => RSTn_to_RST
+        -- );
 
         mode_stabilizer: stabilizer
         generic map (
