@@ -147,6 +147,10 @@ architecture behave of image_processor is
     end component;
 
     component stabilizer is
+    generic (
+        G_RESET_ACTIVE_VALUE    : std_logic --; -- Determines the RST input polarity. 
+        -- G_INITIAL_STATE         : std_logic
+    );
     port ( 
         D_IN        : in  std_logic;
         CLK         : in  std_logic; 
@@ -160,7 +164,6 @@ architecture behave of image_processor is
     signal rotation_to_rotate_dir : std_logic;
     signal ena_to_image_ena : std_logic;
     signal sw_mode_to_mode : std_logic;
-    signal RSTn_to_RST : std_logic;
 
      -- clock generator signals --
     signal outclk_0_to_clk : std_logic;
@@ -192,52 +195,54 @@ architecture behave of image_processor is
         RST <= not RSTn;
 
         enable_stabilizer: stabilizer
+        generic map (
+            G_RESET_ACTIVE_VALUE      => C_RESET_ACTIVE_VALUE --,
+            -- G_INITIAL_STATE           => '0'
+        )
         port map (
             D_IN        => SW_IMAGE_ENA,
             CLK         => outclk_0_to_clk,
-            RST         => rst_sig,
+            RST         => RSTn,
             Q_OUT       => ena_to_image_ena
         );
 
         direction_stabilizer: stabilizer
+        generic map (
+            G_RESET_ACTIVE_VALUE      => C_RESET_ACTIVE_VALUE
+        )
         port map (
             D_IN        => SW_ROTATION_DIR,
             CLK         => outclk_0_to_clk,
-            RST         => rst_sig,
+            RST         => RSTn,
             Q_OUT       => rotation_to_rotate_dir
         );
 
         rotation_stabilizer: stabilizer
+        generic map (
+            G_RESET_ACTIVE_VALUE      => C_RESET_ACTIVE_VALUE
+        )
         port map (
             D_IN        => KEY_ROTATE,
             CLK         => outclk_0_to_clk,
-            RST         => rst_sig,
+            RST         => RSTn,
             Q_OUT       => key_rotate_to_sw_in
         );
 
-        rst_stabilizer: stabilizer
-        port map (
-            D_IN        => RST,
-            CLK         => outclk_0_to_clk,
-            RST         => rst_sig,
-            Q_OUT       => RSTn_to_RST
-        );
-
         mode_stabilizer: stabilizer
+        generic map (
+            G_RESET_ACTIVE_VALUE      => C_RESET_ACTIVE_VALUE
+        )
         port map (
             D_IN        => SW_MODE,
             CLK         => outclk_0_to_clk,
-            RST         => rst_sig,
+            RST         => RSTn,
             Q_OUT       => sw_mode_to_mode
         );
-
-
-
 
         clock: clock_generator            
         port map (
             refclk   => CLK,
-            rst      => RSTn_to_RST,
+            rst      => RST,
             outclk_0 => outclk_0_to_clk,
             locked   => locked_to_rst_sig
         );
