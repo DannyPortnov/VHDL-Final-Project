@@ -13,4 +13,4 @@ add wave -group timing_generator_test timing_generator_tb/uut/*
 config wave -signalnamewidth 1
 --restart -f
 
-run 50ms
+run 100ms
