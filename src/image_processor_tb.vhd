@@ -25,36 +25,25 @@ architecture behave of image_processor_tb is    -- This is the architecture of t
                                 -- System Signals --
         CLK 	         : in  std_logic; -- System clock. 50MHz
         RSTn 	         : in  std_logic; -- Active low system reset. Connect to KEY0
-                                    -- USER Signals --
+                                 -- USER Signals --
         KEY_ROTATE       : in  std_logic;  -- Rotate the image. Rotation direction according to SW_ROTATION_DIR
-                                        -- Short press (<2sec) – Rotate 90° CW or CCW according to SW_ROTATION_DIR.
-                                        -- Long press (≥2sec) – Rotate 90° CW or CCW according to SW_ROTATION_DIR every 1 sec as long as this key is pressed.
-                                        -- Connect to KEY3.
-        SW_ROTATION_DIR  : in  std_logic; -- 0 – Rotate CW.
-                                            -- 1 – Rotate CCW.
-                                            -- Connect to SW2.
-        SW_IMAGE_ENA     : in  std_logic; -- 0 – Show color bar.
-                                        -- 1 – Show image from SRAM.
-        SW_MODE          : in  std_logic;  -- 0 – Normal mode
-                                    -- 1 – Automatic rotation, each 1 sec. Direction according to SW_ROTATION_DIR.
+        SW_ROTATION_DIR  : in  std_logic; -- 0 – Rotate CW, 1 – Rotate CCW.
+        SW_IMAGE_ENA     : in  std_logic; -- 0 – Show color bar, 1 – Show image from SRAM.
+        SW_MODE          : in  std_logic; -- 0 – Manual mode, 1 – Automatic rotation
                                 -- SRAM Signals --
         SRAM_A           : out std_logic_vector(17 downto 0) := (others => '0'); -- SRAM address
         SRAM_D           : in std_logic_vector(15 downto 0) := (others => '0'); -- SRAM data
-        SRAM_CEn         : out std_logic; -- SRAM chip enable. Should be always enabled.
-        SRAM_OEn         : out std_logic; -- SRAM output enable. Should be always enabled.
-        SRAM_WEn         : out std_logic; -- SRAM write enable. Should be always disabled.
-        SRAM_UBn         : out std_logic; -- SRAM upper byte enable. Should be always enabled.
-        SRAM_LBn         : out std_logic; -- SRAM lower byte enable. Should be always enabled. 
-                            -- HDMI Signals --                 
+        SRAM_CEn         : out std_logic;       -- SRAM chip enable. Should be always enabled.
+        SRAM_OEn         : out std_logic;       -- SRAM output enable. Should be always enabled.
+        SRAM_WEn         : out std_logic;       -- SRAM write enable. Should be always disabled.
+        SRAM_UBn         : out std_logic;       -- SRAM upper byte enable. Should be always enabled.
+        SRAM_LBn         : out std_logic;       -- SRAM lower byte enable. Should be always enabled. 
+                             -- HDMI Signals --                 
         HDMI_TX          : out std_logic_vector(23 downto 0);    -- 24-bit RGB pixel data to the HDMI controller.
-                                                            -- HDMI_TX(23:16) – RED data
-                                                            -- HDMI_TX(15:8) – GREEN data
-                                                            -- HDMI_TX(7:0) – BLUE data
-        HDMI_TX_VS       : out std_logic; -- Vertical sync signal to the HDMI controller.
-        HDMI_TX_HS       : out std_logic; -- Horizontal sync signal to the HDMI controller.
-        HDMI_TX_DE       : out std_logic;    -- Data enable signal to the HDMI controller.
-                                          -- Should be 1 while in visible area and 0 during blanking time.
-        HDMI_TX_CLK      : out std_logic; -- 25MHz clock signal to the HDMI controller.
+        HDMI_TX_VS       : out std_logic;       -- Vertical sync signal to the HDMI controller.
+        HDMI_TX_HS       : out std_logic;       -- Horizontal sync signal to the HDMI controller.
+        HDMI_TX_DE       : out std_logic;       -- Data enable signal to the HDMI controller.
+        HDMI_TX_CLK      : out std_logic;       -- 25MHz clock signal to the HDMI controller.
                                 -- 7 Segment signals --
         HEX0             : out std_logic_vector(6 downto 0); -- 7 segment display unity digit
         HEX1             : out std_logic_vector(6 downto 0);    -- 7 segment display tens digit
