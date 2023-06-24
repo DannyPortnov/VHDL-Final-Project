@@ -36,7 +36,7 @@ end entity;
 
 architecture behave of controller is
     signal angle_sig               : integer range 0 to 3 := 0;
-    signal counter                 : integer := 0;
+    signal counter                 : integer range 0 to G_VAL_1SEC + 1 := 0;
     signal rotate_sig              : std_logic := '0';
     constant BASE_ANGLE            : integer := 90;
     signal unity_bcd_out           : std_logic_vector(6 downto 0);
