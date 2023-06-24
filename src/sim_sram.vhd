@@ -8,7 +8,7 @@ generic (
 	ini_file_name		: string := "UNUSED"
 );
 port (
-    SRAM_ADDR       : in    std_logic_vector(17 downto 0);  -- sram address
+    SRAM_ADDR       : in    std_logic_vector(17 downto 0) := (others=>'0');  -- sram address
     SRAM_DQ         : inout std_logic_vector(15 downto 0);  -- sram data
     SRAM_WE_N       : in    std_logic;                      -- sram write enable 
     SRAM_OE_N       : in    std_logic;                      -- sram output enable
@@ -28,13 +28,15 @@ architecture sim of sim_sram is
     type mem_array_type is array(0 to MEM_SIZE-1) of std_logic_vector(15 downto 0);
 
     signal mem_addr_i       : integer := 0;
-    signal sram_dq_in       : std_logic_vector(15 downto 0);
-    
+    signal sram_dq_in       : std_logic_vector(15 downto 0) := (others=>'0');
+    signal SRAM_CE_N_d		: std_logic := '1';
     
     shared variable mem_array   : mem_array_type;
 
 begin
     
+	SRAM_CE_N_d <= SRAM_CE_N;
+	
     mem_init: process
         type char_file_t is file of character;
         file char_file : char_file_t;
@@ -45,7 +47,7 @@ begin
     begin
         if ini_file_name /= "UNUSED" then
 			file_open(char_file, ini_file_name);
-			while not endfile(char_file) loop
+			while ( (not endfile(char_file)) and (i < MEM_SIZE))  loop
 				read(char_file, char_v);
 				byte_v := character'pos(char_v);
 				mem_array(i)(7 downto 0) := conv_std_logic_vector(byte_v, 8);
@@ -79,7 +81,7 @@ begin
     end process;
     
     
-    SRAM_DQ(7 downto 0) <= transport mem_array(mem_addr_i)(7 downto 0) after Tpd2 when (SRAM_CE_N = '0' and SRAM_OE_N = '0' and SRAM_LB_N = '0') else (others=>'Z') after Tpd2;
-    SRAM_DQ(15 downto 8) <= transport mem_array(mem_addr_i)(15 downto 8) after Tpd2 when (SRAM_CE_N = '0' and SRAM_OE_N = '0' and SRAM_LB_N = '0') else (others=>'Z') after Tpd2;
+    SRAM_DQ(7 downto 0) <= transport mem_array(mem_addr_i)(7 downto 0) after Tpd2 when (SRAM_CE_N_d = '0' and SRAM_OE_N = '0' and SRAM_LB_N = '0') else (others=>'Z') after Tpd2;
+    SRAM_DQ(15 downto 8) <= transport mem_array(mem_addr_i)(15 downto 8) after Tpd2 when (SRAM_CE_N_d = '0' and SRAM_OE_N = '0' and SRAM_LB_N = '0') else (others=>'Z') after Tpd2;
             
 end architecture;
