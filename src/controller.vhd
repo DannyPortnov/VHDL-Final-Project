@@ -35,14 +35,14 @@ port (
 end entity;
 
 architecture behave of controller is
-    signal angle_sig : integer range 0 to 3 := 0;
-    signal counter : integer := 0;
-    signal rotate_sig : std_logic := '0';
-    constant BASE_ANGLE : integer := 90;
-    signal unity_bcd_out : std_logic_vector(6 downto 0);
-    signal tens_bcd_of_90_out : std_logic_vector(6 downto 0);
-    signal tens_bcd_of_180_out : std_logic_vector(6 downto 0);
-    signal tens_bcd_of_270_out : std_logic_vector(6 downto 0);
+    signal angle_sig               : integer range 0 to 3 := 0;
+    signal counter                 : integer := 0;
+    signal rotate_sig              : std_logic := '0';
+    constant BASE_ANGLE            : integer := 90;
+    signal unity_bcd_out           : std_logic_vector(6 downto 0);
+    signal tens_bcd_of_90_out      : std_logic_vector(6 downto 0);
+    signal tens_bcd_of_180_out     : std_logic_vector(6 downto 0);
+    signal tens_bcd_of_270_out     : std_logic_vector(6 downto 0);
     signal hundreds_bcd_of_270_out : std_logic_vector(6 downto 0);
     signal hundreds_bcd_of_180_out : std_logic_vector(6 downto 0);
 

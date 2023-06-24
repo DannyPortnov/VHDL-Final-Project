@@ -38,14 +38,6 @@ architecture behave of timing_generator is
     begin
 
 
-    -- **************************************************************************
-    -- ***********************  CHANGE IN TIMING GENERATOR  *********************
-    -- ****** H_CNT and V_CNT now count only in the range the visible area ******
-    -- ****** If they exceed the visible area, their value will be constant *****
-    -- **************************************************************************
-    -- **************************************************************************
-
-
 
     process(CLK,RST)
     begin
@@ -83,40 +75,16 @@ architecture behave of timing_generator is
             if ((h_cnt_sig - HS_pulse - H_BP) >= (H_visible + H_FP - 1) or h_cnt_sig < (HS_pulse - 1)) then
                 H_SYNC <= '0';
             elsif ((h_cnt_sig - HS_pulse - H_BP) < (H_visible + H_FP - 1) and h_cnt_sig >= (HS_pulse - 1)) then
-                H_SYNC <= '1';
-            -- if (h_cnt_sig = (C_PIXELS_PER_LINE - 1) or h_cnt_sig < (HS_pulse - 1)) then
-            --     H_SYNC <= '0';
-            -- else
-            --     H_SYNC <= '1';
-            -- elsif (h_cnt_sig = C_PIXELS_PER_LINE - 1) then
-            --     H_SYNC <= '1';                
+                H_SYNC <= '1';             
             end if;
 
-    --*********************************************************************************************************
-    -- old implementation for vs + vertical sync (with delay of 1 clk for V_SYNC)
-    --*********************************************************************************************************
-        -- update VS
-            -- if ((v_cnt_sig = (V_visible + V_FP - 1)) and (h_cnt_sig = (C_PIXELS_PER_LINE - 1))) then
-            --     VS <= '1';  -- update VS- active high for only 1 clk pulse!
-            -- else
-            --     VS <= '0';
-            -- end if; 
-        -- vertical sync for 480 pixels
-            -- if (v_cnt_sig > (V_visible + V_FP - 1) and v_cnt_sig <= (C_PIXELS_PER_FRAME - V_BP - 1)) then
-            --     V_SYNC <= '0';
-            -- elsif (v_cnt_sig <= (V_visible + V_FP - 1) or v_cnt_sig > (C_PIXELS_PER_FRAME - V_BP - 1)) then
-            --     V_SYNC <= '1';
-            -- elsif (v_cnt_sig = C_PIXELS_PER_LINE - 1) then
-            --     V_SYNC <= '1';
-            -- end if;
-    --*********************************************************************************************************
+
         end if;
     end process;
     H_CNT <= (h_cnt_sig - HS_pulse - H_BP) when (h_cnt_sig >= (HS_pulse + H_BP) and h_cnt_sig <=(C_PIXELS_PER_LINE - H_FP - 1))
                                            else  C_PIXELS_PER_LINE - 1;
     V_CNT <= v_cnt_sig;
-    -- V_CNT <= v_cnt_sig when (h_cnt_sig >= (HS_pulse + H_BP) and h_cnt_sig <=(C_PIXELS_PER_LINE - H_FP - 1))
-    --                    else C_PIXELS_PER_FRAME - 1;
+
 end architecture;
 
 

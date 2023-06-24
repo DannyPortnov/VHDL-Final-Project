@@ -124,7 +124,6 @@ set_location_assignment PIN_M22 -to SRAM_OEn
 set_location_assignment PIN_G25 -to SRAM_WEn
 set_location_assignment PIN_H25 -to SRAM_LBn
 set_location_assignment PIN_M25 -to SRAM_UBn
-set_location_assignment PIN_AC9 -to SW_ANIMATION_DIR
 set_location_assignment PIN_AE19 -to SW_IMAGE_ENA
 
 set_location_assignment PIN_V19 -to HEX0[0]
@@ -229,7 +228,6 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_OEn
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_WEn
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_LBn
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SRAM_UBn
-set_instance_assignment -name IO_STANDARD "1.2 V" -to SW_ANIMATION_DIR
 set_instance_assignment -name IO_STANDARD "1.2 V" -to SW_IMAGE_ENA
 
 set_instance_assignment -name IO_STANDARD "1.2 V" -to HEX0[0]
