@@ -77,8 +77,6 @@ architecture behave of timing_generator is
             elsif ((h_cnt_sig - HS_pulse - H_BP) < (H_visible + H_FP - 1) and h_cnt_sig >= (HS_pulse - 1)) then
                 H_SYNC <= '1';             
             end if;
-
-
         end if;
     end process;
     H_CNT <= (h_cnt_sig - HS_pulse - H_BP) when (h_cnt_sig >= (HS_pulse + H_BP) and h_cnt_sig <=(C_PIXELS_PER_LINE - H_FP - 1))
