@@ -25,7 +25,7 @@ begin
 	
 	begin
 		if RST = '0' then
-			D2_Q1 <= '1';
+			D2_Q1 <= '1'; -- Default value
 			Q_OUT <= '1';
 		elsif rising_edge(CLK) then 
 			Q_OUT <= D2_Q1;

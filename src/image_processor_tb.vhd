@@ -136,7 +136,13 @@ begin
         key_rotate_sig <= not key_rotate_sig; -- Press button
         wait for C_CLK_PRD;
         key_rotate_sig <= not key_rotate_sig; -- Release button
-
+        wait for 30 ms; -- Wait for picture to be drawn completely
+        sw_rotation_dir_sig <= not sw_rotation_dir_sig; -- Change direction
+        key_rotate_sig <= not key_rotate_sig; -- Press button
+        wait for 10 ms;
+        rst_sig <= C_RESET_ACTIVE_VALUE; -- Reset
+        wait for 1 ms;
+        rst_sig <= not C_RESET_ACTIVE_VALUE; -- Release reset
 
     end process;
 

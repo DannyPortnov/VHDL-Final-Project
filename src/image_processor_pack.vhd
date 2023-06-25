@@ -27,6 +27,8 @@ package image_processor_pack is
   
     constant IMAGE_V_START            : integer := 0;
     constant IMAGE_V_END              : integer := VISIBLE_PIXELS_PER_FRAME - 1;
+    -- COLOR BAR CONSTANTS --
+    constant COLOR_SEGMENTS           : integer := 8; -- number of segments in color bar
 
     -- function that converts color from L<=8 bit to 8 bit representation
     function color_convert (P_in: std_logic_vector) return std_logic_vector;

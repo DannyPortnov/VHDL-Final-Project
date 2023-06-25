@@ -40,7 +40,7 @@ architecture behave of data_generator is
     constant Cyan          : integer := 6;
     constant White         : integer := 7;
     -- length of a color segment
-    constant SEGMENT_WIDTH : integer := VISIBLE_PIXELS_PER_LINE / 8;  -- Equal width for each color segment
+    constant SEGMENT_WIDTH : integer := VISIBLE_PIXELS_PER_LINE / COLOR_SEGMENTS;  -- Equal width for each color segment
 
     -- Signal declarations:
 
